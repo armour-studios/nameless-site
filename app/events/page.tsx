@@ -3,6 +3,8 @@
 import Card from "@/components/Card";
 import { FaTrophy, FaCalendar, FaGamepad, FaMedal } from "react-icons/fa";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Standing {
     placement: number;
@@ -42,6 +44,24 @@ export default function Tournaments() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'upcoming' | 'rocket-rush' | 'nil' | 'past' | 'standings'>('upcoming');
+    const [standingsFilter, setStandingsFilter] = useState<'rocket-rush' | 'nil'>('rocket-rush');
+    const [currentHeaderIndex, setCurrentHeaderIndex] = useState(0);
+
+    // Rotating headers
+    const headers = [
+        {
+            title: "SEASON 1: JAN - MAY 2026",
+            subtitle: "ROCKET RUSH SERIES",
+            link: "/events#rocket-rush",
+            gradient: "from-purple-600/90 via-pink-600/80 to-purple-700/90"
+        },
+        {
+            title: "FALL 2026 - SPRING 2027",
+            subtitle: "NAMELESS INITIATIVE LEAGUE",
+            link: "/initiative",
+            gradient: "from-indigo-600/90 via-purple-600/80 to-blue-700/90"
+        }
+    ];
 
     useEffect(() => {
         fetchTournaments();
@@ -50,12 +70,23 @@ export default function Tournaments() {
         const handleHash = () => {
             if (window.location.hash === '#past-events') {
                 setActiveTab('past');
+            } else if (window.location.hash === '#rocket-rush') {
+                setActiveTab('rocket-rush');
             }
         };
 
         handleHash();
         window.addEventListener('hashchange', handleHash);
-        return () => window.removeEventListener('hashchange', handleHash);
+
+        // Auto-rotate headers every 6 seconds
+        const headerInterval = setInterval(() => {
+            setCurrentHeaderIndex((prev) => (prev + 1) % headers.length);
+        }, 6000);
+
+        return () => {
+            window.removeEventListener('hashchange', handleHash);
+            clearInterval(headerInterval);
+        };
     }, []);
 
     const fetchTournaments = async () => {
@@ -92,7 +123,6 @@ export default function Tournaments() {
     };
 
     const getEntrantCount = (tournament: Tournament) => {
-        if (tournament.numAttendees) return tournament.numAttendees;
         if (tournament.events && tournament.events.length > 0) {
             return tournament.events.reduce((sum, event) => sum + (event.numEntrants || 0), 0);
         }
@@ -113,7 +143,14 @@ export default function Tournaments() {
 
     const getTournamentImage = (tournament: Tournament) => {
         if (tournament.images && tournament.images.length > 0) {
-            return tournament.images.find(img => img.type === 'banner')?.url || tournament.images[0].url;
+            // Prefer profile/avatar images for thumbnail, fall back to banner
+            const profileImage = tournament.images.find(img => img.type === 'profile');
+            if (profileImage) return profileImage.url;
+
+            const bannerImage = tournament.images.find(img => img.type === 'banner');
+            if (bannerImage) return bannerImage.url;
+
+            return tournament.images[0].url;
         }
         return null;
     };
@@ -130,7 +167,7 @@ export default function Tournaments() {
     };
 
     const isNIL = (tournament: Tournament) => {
-        return tournament.name.toLowerCase().includes('nil');
+        return tournament.name.toLowerCase().includes('nil') || tournament.name.toLowerCase().includes('initiative');
     };
 
     const filterByCategory = () => {
@@ -144,10 +181,16 @@ export default function Tournaments() {
                 }).sort((a, b) => (a.startAt || Infinity) - (b.startAt || Infinity));
 
             case 'rocket-rush':
-                return tournaments.filter(isRocketRush).sort((a, b) => (a.startAt || Infinity) - (b.startAt || Infinity));
+                return tournaments.filter(t => {
+                    const status = getStatus(t);
+                    return isRocketRush(t) && (status === 'upcoming' || status === 'live');
+                }).sort((a, b) => (a.startAt || Infinity) - (b.startAt || Infinity));
 
             case 'nil':
-                return tournaments.filter(isNIL).sort((a, b) => (a.startAt || Infinity) - (b.startAt || Infinity));
+                return tournaments.filter(t => {
+                    const status = getStatus(t);
+                    return isNIL(t) && (status === 'upcoming' || status === 'live');
+                }).sort((a, b) => (a.startAt || Infinity) - (b.startAt || Infinity));
 
             case 'past':
                 return tournaments.filter(t => getStatus(t) === 'completed' || getStatus(t) === 'past')
@@ -171,43 +214,138 @@ export default function Tournaments() {
         .sort((a, b) => (b.startAt || 0) - (a.startAt || 0))
         .slice(0, 3);
 
+    const currentHeader = headers[currentHeaderIndex];
+
     return (
         <main className="min-h-screen pb-20 px-4 md:px-8 max-w-[1400px] mx-auto">
 
-            {/* Season Banner */}
-            <a
-                href="https://www.start.gg/hub/nameless-esports"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block mb-8 group"
-            >
+            {/* Rotating Season Banners */}
+            <Link href={currentHeader.link} className="block mb-8 group">
                 <div className="relative overflow-hidden rounded-lg border-2 border-white/20 hover:border-pink-500 transition-all h-48 md:h-64">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/90 via-pink-600/80 to-purple-700/90"></div>
+                    {/* Background Image Layer */}
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentHeaderIndex}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="absolute inset-0"
+                        >
+                            {currentHeaderIndex === 0 ? (
+                                // Rocket League background
+                                <div
+                                    className="w-full h-full bg-cover bg-center"
+                                    style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=1200&h=400&fit=crop)' }}
+                                />
+                            ) : (
+                                // Collegiate esports background
+                                <div
+                                    className="w-full h-full bg-cover bg-center"
+                                    style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1200&h=400&fit=crop)' }}
+                                />
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
+                    {/* Gradient Overlay */}
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={currentHeaderIndex}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className={`absolute inset-0 bg-gradient-to-r ${currentHeader.gradient} mix-blend-multiply`}
+                        />
+                    </AnimatePresence>
+                    {/* Dark overlay for text readability */}
+                    <div className="absolute inset-0 bg-black/40" />
                     <div className="relative h-full flex flex-col items-center justify-center text-center py-8 px-4">
-                        <div className="text-xs md:text-sm uppercase tracking-widest text-white/90 mb-2 font-semibold">Current Season</div>
-                        <div className="text-3xl md:text-5xl font-black font-[family-name:var(--font-heading)] text-white mb-4">
-                            SEASON 1: JAN - MAY 2025
-                        </div>
-                        <span className="btn-primary px-6 md:px-8 py-2 md:py-3 text-sm md:text-base cursor-pointer">
-                            Join Our Competitive Leagues →
-                        </span>
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentHeaderIndex}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                            >
+                                <div className="text-xs md:text-sm uppercase tracking-widest text-white/90 mb-2 font-semibold">{currentHeader.subtitle}</div>
+                                <div className="text-3xl md:text-5xl font-black font-[family-name:var(--font-heading)] text-white mb-4">
+                                    {currentHeader.title}
+                                </div>
+                                <span className="btn-primary px-6 md:px-8 py-2 md:py-3 text-sm md:text-base cursor-pointer">
+                                    Learn More →
+                                </span>
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
                 </div>
-            </a>
+            </Link>
 
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
-                <h1 className="text-4xl md:text-6xl font-[family-name:var(--font-heading)] font-black text-white">
+            {/* Header with Stats Banner */}
+            <div className="mb-8">
+                {/* Page Title */}
+                <h1 className="text-4xl md:text-6xl font-[family-name:var(--font-heading)] font-black text-white mb-6">
                     <span className="text-gradient">Events</span>
                 </h1>
-                <a
-                    href="https://www.start.gg/hub/nameless-esports"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-outline flex items-center gap-2"
-                >
-                    Visit Hub
-                </a>
+
+                {/* Stats Banner */}
+                <Card className="bg-gradient-to-r from-purple-900/40 via-pink-900/40 to-purple-900/40 border-pink-500/30">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6">
+                        {/* Stats Grid */}
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-8 md:gap-10">
+                            {/* Total Events */}
+                            <div className="text-center">
+                                <div className="text-3xl md:text-4xl font-black text-cyan-400">{tournaments.length}</div>
+                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Events Hosted</div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="hidden md:block h-12 w-px bg-white/20"></div>
+
+                            {/* Total Teams */}
+                            <div className="text-center">
+                                <div className="text-3xl md:text-4xl font-black text-purple-400">
+                                    {tournaments.reduce((sum, t) => sum + (t.events?.reduce((s, e) => s + (e.numEntrants || 0), 0) || 0), 0)}
+                                </div>
+                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Teams Played</div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="hidden md:block h-12 w-px bg-white/20"></div>
+
+                            {/* Total Attendees */}
+                            <div className="text-center">
+                                <div className="text-3xl md:text-4xl font-black text-pink-400">
+                                    {tournaments.reduce((sum, t) => sum + (t.numAttendees || 0), 0)}
+                                </div>
+                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Total Attendees</div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="hidden md:block h-12 w-px bg-white/20"></div>
+
+                            {/* Total Matches */}
+                            <div className="text-center">
+                                <div className="text-3xl md:text-4xl font-black text-yellow-400">
+                                    {tournaments.reduce((sum, t) => {
+                                        const teams = t.events?.reduce((s, e) => s + (e.numEntrants || 0), 0) || 0;
+                                        return sum + Math.max(0, teams - 1);
+                                    }, 0)}
+                                </div>
+                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Matches Played</div>
+                            </div>
+                        </div>
+
+                        {/* Visit Analytics Hub Button */}
+                        <Link
+                            href="/events/analytics"
+                            className="btn-primary px-6 py-3 text-sm whitespace-nowrap flex items-center gap-2"
+                        >
+                            Visit Analytics Hub →
+                        </Link>
+                    </div>
+                </Card>
             </div>
 
             {/* Category Tabs */}
@@ -265,11 +403,30 @@ export default function Tournaments() {
                         </Card>
                     ) : activeTab === 'standings' ? (
                         <Card className="p-8">
-                            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                                <FaTrophy className="text-yellow-500" /> Season 1 Team Standings
-                            </h2>
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                                <h2 className="text-2xl font-bold flex items-center gap-2">
+                                    <FaTrophy className="text-yellow-500" /> Season Standings
+                                </h2>
+                                {/* Standings Filter Toggle */}
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setStandingsFilter('rocket-rush')}
+                                        className={`px-6 py-2 rounded-lg font-bold text-xs transition-all uppercase ${standingsFilter === 'rocket-rush' ? 'bg-pink-500 text-white' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}
+                                    >
+                                        Rocket Rush
+                                    </button>
+                                    <button
+                                        onClick={() => setStandingsFilter('nil')}
+                                        className={`px-6 py-2 rounded-lg font-bold text-xs transition-all uppercase ${standingsFilter === 'nil' ? 'bg-purple-500 text-white' : 'bg-white/10 text-gray-400 hover:bg-white/20'}`}
+                                    >
+                                        Initiative League
+                                    </button>
+                                </div>
+                            </div>
                             <p className="text-gray-400 text-center py-12">
-                                Season standings coming soon...
+                                {standingsFilter === 'rocket-rush'
+                                    ? 'Rocket Rush standings coming soon...'
+                                    : 'Initiative League standings coming soon...'}
                             </p>
                         </Card>
                     ) : displayTournaments.length === 0 ? (
@@ -305,7 +462,7 @@ export default function Tournaments() {
                                             <div className="flex flex-col md:flex-row items-start gap-6">
 
                                                 {/* Tournament Image */}
-                                                <div className="w-full md:w-48 h-32 bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded overflow-hidden border border-white/10 group-hover:border-cyan-400 transition-colors flex-shrink-0">
+                                                <div className="w-32 h-32 bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded overflow-hidden border border-white/10 group-hover:border-cyan-400 transition-colors flex-shrink-0 flex items-center justify-center">
                                                     {imageUrl ? (
                                                         <img
                                                             src={imageUrl}
@@ -313,9 +470,7 @@ export default function Tournaments() {
                                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                                         />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center">
-                                                            <FaGamepad className="text-5xl text-gray-600 group-hover:text-cyan-400 transition-colors" />
-                                                        </div>
+                                                        <FaGamepad className="text-5xl text-gray-600 group-hover:text-cyan-400 transition-colors" />
                                                     )}
                                                 </div>
 
@@ -351,11 +506,6 @@ export default function Tournaments() {
                                                         {entrants > 0 && (
                                                             <span className="flex items-center gap-2 text-cyan-400">
                                                                 <FaTrophy /> {entrants} Teams
-                                                            </span>
-                                                        )}
-                                                        {tournament.numAttendees && tournament.numAttendees > 0 && (
-                                                            <span className="flex items-center gap-2 text-purple-400">
-                                                                👥 {tournament.numAttendees} Attendees
                                                             </span>
                                                         )}
                                                     </div>

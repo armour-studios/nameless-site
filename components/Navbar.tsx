@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaDiscord, FaTwitter, FaUser } from "react-icons/fa";
+import { FaDiscord, FaTwitter, FaUser, FaTwitch } from "react-icons/fa";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Event } from "@/lib/startgg";
@@ -115,7 +115,7 @@ export default function Navbar() {
                                         >
                                             <div className="p-2 flex flex-col gap-1">
                                                 <Link
-                                                    href="/events#rocket-rush"
+                                                    href="/rocket-rush"
                                                     className="px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-sm font-bold text-gray-300 hover:text-pink-500 uppercase"
                                                     onClick={() => setIsLeaguesOpen(false)}
                                                 >
@@ -156,8 +156,11 @@ export default function Navbar() {
                             <a href="https://discord.com/invite/G9uMk2N9bY" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                                 <FaDiscord size={22} />
                             </a>
-                            <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                            <a href="https://x.com/nameless_llc" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
                                 <FaTwitter size={22} />
+                            </a>
+                            <a href="https://www.twitch.tv/namelessesportshq" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                                <FaTwitch size={22} />
                             </a>
 
                             {status === "loading" ? (

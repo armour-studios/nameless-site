@@ -350,7 +350,7 @@ export default function TournamentDetail() {
                             {status === 'completed' ? 'Completed' : status === 'live' ? 'Live' : 'Upcoming'}
                         </span>
                         <span className="text-white/80 text-sm flex items-center gap-2">
-                            <FaUsers /> {tournament.numAttendees} Attendees
+                            <FaUsers /> {totalEntrants} Teams
                         </span>
                     </div>
 
@@ -390,8 +390,8 @@ export default function TournamentDetail() {
                     <div className="text-sm text-gray-400 mt-1">Teams</div>
                 </Card>
                 <Card className="text-center">
-                    <div className="text-3xl font-bold text-pink-400">{tournament.numAttendees}</div>
-                    <div className="text-sm text-gray-400 mt-1">Attendees</div>
+                    <div className="text-3xl font-bold text-pink-400">{totalEntrants}</div>
+                    <div className="text-sm text-gray-400 mt-1">Total Teams</div>
                 </Card>
                 <Card className="text-center">
                     <div className="text-3xl font-bold text-green-400">
