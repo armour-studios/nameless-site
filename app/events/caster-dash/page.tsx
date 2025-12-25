@@ -6,6 +6,8 @@ import Link from "next/link";
 import LiveTicker from "@/components/analytics/LiveTicker";
 import AnalyticsFilters, { FilterState } from "@/components/analytics/AnalyticsFilters";
 import SideNav from "@/components/analytics/SideNav";
+import MobileAnalyticsNav from "@/components/analytics/MobileAnalyticsNav";
+import LiveFeedModal from "@/components/analytics/LiveFeedModal";
 import CustomSelect from "@/components/CustomSelect";
 import {
     FaTrophy,
@@ -62,6 +64,7 @@ export default function CasterDashboard() {
     const [team2, setTeam2] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+    const [showMobileLiveFeed, setShowMobileLiveFeed] = useState(false);
 
     useEffect(() => {
         fetchTournaments();
@@ -218,11 +221,14 @@ export default function CasterDashboard() {
 
     return (
         <div className="flex min-h-screen">
-            {/* Left Sidebar Navigation */}
             <SideNav />
+            <MobileAnalyticsNav
+                onLiveFeedToggle={() => setShowMobileLiveFeed(!showMobileLiveFeed)}
+                showLiveFeed={showMobileLiveFeed}
+            />
 
             {/* Main Content */}
-            <main className="flex-1 pb-20 px-4 md:px-8">
+            <main className="flex-1 pb-20 px-4 md:px-8 pt-28 lg:pt-4">
                 {/* Header */}
                 <div className="flex items-center justify-end mb-6 pt-4">
                     <div className="flex items-center gap-4">
@@ -568,10 +574,16 @@ export default function CasterDashboard() {
                 </Card>
             </main>
 
-            {/* Live Ticker Sidebar */}
-            <aside className="w-80 bg-gray-900/50 border-l border-white/10 h-screen sticky top-0">
+            {/* Live Ticker Sidebar - Hidden on Mobile */}
+            <aside className="hidden lg:block w-80 bg-gray-900/50 border-l border-white/10 h-screen sticky top-0">
                 <LiveTicker autoRefresh={true} />
             </aside>
+
+            {/* Mobile Live Feed Modal */}
+            <LiveFeedModal
+                isOpen={showMobileLiveFeed}
+                onClose={() => setShowMobileLiveFeed(false)}
+            />
         </div>
     );
 }

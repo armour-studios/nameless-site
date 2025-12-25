@@ -6,6 +6,8 @@ import Link from "next/link";
 import LiveTicker from "@/components/analytics/LiveTicker";
 import AnalyticsFilters, { FilterState } from "@/components/analytics/AnalyticsFilters";
 import SideNav from "@/components/analytics/SideNav";
+import MobileAnalyticsNav from "@/components/analytics/MobileAnalyticsNav";
+import LiveFeedModal from "@/components/analytics/LiveFeedModal";
 import {
     FaTrophy,
     FaCalendar,
@@ -44,11 +46,13 @@ interface Tournament {
     }>;
 }
 
-export default function Analytics() {
+export default function AnalyticsPage() {
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [selectedWeek, setSelectedWeek] = useState<string>("all");
     const [filters, setFilters] = useState<FilterState>({ eventTypes: [], dateRange: { start: '', end: '' } });
+    const [loading, setLoading] = useState(true);
     const [showTicker, setShowTicker] = useState(true);
+    const [showMobileLiveFeed, setShowMobileLiveFeed] = useState(false);
 
     useEffect(() => {
         fetchTournaments();
@@ -210,9 +214,13 @@ export default function Analytics() {
     return (
         <div className="flex min-h-screen">
             <SideNav />
+            <MobileAnalyticsNav
+                onLiveFeedToggle={() => setShowMobileLiveFeed(!showMobileLiveFeed)}
+                showLiveFeed={showMobileLiveFeed}
+            />
 
             {/* Main Content */}
-            <main className="flex-1 pb-20 px-4 md:px-8 pt-16 md:pt-4">
+            <main className="flex-1 pb-20 px-4 md:px-8 pt-28 lg:pt-4">
                 <div className="mb-6">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                         <div>
@@ -231,22 +239,22 @@ export default function Analytics() {
 
                 {/* Key Metrics Overview - Mobile Optimized */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
-                    <Card className="text-center bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 p-6">
+                    <Card className="text-center bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 p-4 sm:p-6">
                         <FaCalendar className="text-3xl text-cyan-400 mx-auto mb-2" />
                         <div className="text-4xl font-black text-cyan-400">{totalEvents}</div>
                         <div className="text-sm text-gray-400 mt-1">Total Events</div>
                     </Card>
-                    <Card className="text-center bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-500/30 p-6">
+                    <Card className="text-center bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-500/30 p-4 sm:p-6">
                         <FaUsers className="text-3xl text-purple-400 mx-auto mb-2" />
                         <div className="text-4xl font-black text-purple-400">{uniqueTeams.size}</div>
                         <div className="text-sm text-gray-400 mt-1">Unique Teams</div>
                     </Card>
-                    <Card className="text-center bg-gradient-to-br from-pink-900/20 to-red-900/20 border-pink-500/30 p-6">
+                    <Card className="text-center bg-gradient-to-br from-pink-900/20 to-red-900/20 border-pink-500/30 p-4 sm:p-6">
                         <FaTrophy className="text-3xl text-pink-400 mx-auto mb-2" />
                         <div className="text-4xl font-black text-pink-400">{totalAttendees}</div>
                         <div className="text-sm text-gray-400 mt-1">Total Attendees</div>
                     </Card>
-                    <Card className="text-center bg-gradient-to-br from-yellow-900/20 to-orange-900/20 border-yellow-500/30 p-6">
+                    <Card className="text-center bg-gradient-to-br from-yellow-900/20 to-orange-900/20 border-yellow-500/30 p-4 sm:p-6">
                         <FaGamepad className="text-3xl text-yellow-400 mx-auto mb-2" />
                         <div className="text-4xl font-black text-yellow-400">{totalMatches}</div>
                         <div className="text-sm text-gray-400 mt-1">Matches Played</div>
@@ -293,11 +301,11 @@ export default function Analytics() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     {/* League Distribution Pie Chart */}
                     <Card>
-                        <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                        <h2 className="text-xl sm:text-2xl font-bold mb-6 flex items-center gap-2">
                             <FaChartPie className="text-purple-400" /> League Distribution
                         </h2>
-                        <div className="flex items-center justify-center gap-12">
-                            <div className="relative w-48 h-48">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12">
+                            <div className="relative w-40 h-40 sm:w-48 sm:h-48">
                                 <svg viewBox="0 0 100 100" className="transform -rotate-90">
                                     <circle cx="50" cy="50" r="40" fill="none" stroke="#ec4899" strokeWidth="20"
                                         strokeDasharray={`${totalEvents > 0 ? (rocketRushEvents / totalEvents) * 251 : 0} 251`} />
@@ -343,7 +351,7 @@ export default function Analytics() {
 
                     {/* Event Status */}
                     <Card>
-                        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                        <h2 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2">
                             <FaChartLine className="text-blue-400" /> Event Status
                         </h2>
                         <div className="space-y-4">
@@ -552,8 +560,8 @@ export default function Analytics() {
                 </div>
             </main>
 
-            {/* Right Ticker Sidebar */}
-            <aside className="w-80 bg-gray-900/50 border-l border-white/10 h-screen sticky top-0">
+            {/* Right Ticker Sidebar - Hidden on Mobile */}
+            <aside className="hidden lg:block w-80 bg-gray-900/50 border-l border-white/10 h-screen sticky top-0">
                 {showTicker ? (
                     <LiveTicker autoRefresh={true} />
                 ) : (
@@ -563,6 +571,12 @@ export default function Analytics() {
                     </div>
                 )}
             </aside>
+
+            {/* Mobile Live Feed Modal */}
+            <LiveFeedModal
+                isOpen={showMobileLiveFeed}
+                onClose={() => setShowMobileLiveFeed(false)}
+            />
         </div>
     );
 }
