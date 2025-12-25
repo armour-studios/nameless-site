@@ -1,63 +1,16 @@
-"use client";
-
 import Card from "@/components/Card";
 import { FaDiscord, FaTrophy, FaCalendar } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { getAllNews } from "@/utils/news";
+import RecentChampions from "@/components/homepage/RecentChampions";
 
-interface Standing {
-  placement: number;
-  entrant: {
-    name: string;
-  };
-}
+export const dynamic = 'force-dynamic';
 
-interface RecentEvent {
-  id: number;
-  name: string;
-  startAt: number;
-  state: string;
-  videogame?: {
-    name: string;
-  };
-  tournament?: {
-    name: string;
-  };
-  standings?: {
-    nodes: Standing[];
-  };
-}
-
-export default function Home() {
-  const [recentEvents, setRecentEvents] = useState<RecentEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchRecentResults();
-  }, []);
-
-  const fetchRecentResults = async () => {
-    try {
-      const response = await fetch('/api/tournaments?recent=true');
-      const data = await response.json();
-
-      if (data.success && data.data && data.data.length > 0) {
-        // Get events that actually have standings/winners
-        const eventsWithWinners = data.data.filter((e: RecentEvent) => e.standings?.nodes && e.standings.nodes.length > 0);
-        setRecentEvents(eventsWithWinners);
-      }
-    } catch (error) {
-      console.error('Error fetching recent results:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
+export default async function Home() {
+  // Fetch news articles from RSS feed
+  const allNews = await getAllNews();
+  const latestNews = allNews.slice(0, 3);
 
   return (
     <main className="min-h-screen pt-8 pb-20 px-4 md:px-8 max-w-[1400px] mx-auto text-white">
@@ -65,26 +18,26 @@ export default function Home() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
         {/* Main Hero */}
         <div className="lg:col-span-8 order-1 flex flex-col">
-          <Card className="flex-1 flex flex-col justify-center items-start px-8 md:px-12 relative overflow-hidden group min-h-[500px]">
+          <Card className="flex-1 flex flex-col justify-center items-start px-6 sm:px-8 md:px-12 py-8 md:py-12 relative overflow-hidden group min-h-[400px] sm:min-h-[450px] md:min-h-[500px]">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-pink-900/20 to-transparent"></div>
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200')] bg-cover bg-center opacity-10 group-hover:opacity-20 transition-opacity"></div>
 
-            <div className="relative z-10 max-w-2xl">
-              <h1 className="text-6xl md:text-8xl font-black tracking-tight mb-4 font-[family-name:var(--font-heading)]">
+            <div className="relative z-10 max-w-2xl w-full">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tight mb-4 font-[family-name:var(--font-heading)] leading-[1.1] break-words">
                 <span className="text-white block mb-2">NAMELESS</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500 block">
                   ESPORTS
                 </span>
               </h1>
-              <p className="text-xl text-gray-300 mb-8 leading-relaxed font-medium">
+              <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 md:mb-8 leading-relaxed font-medium">
                 The premier competitive experience. Join the elite and showcase your skills on the global stage.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <a href="https://discord.com/invite/G9uMk2N9bY" target="_blank" rel="noopener noreferrer" className="btn-primary flex items-center gap-2 px-8">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <a href="https://discord.com/invite/G9uMk2N9bY" target="_blank" rel="noopener noreferrer" className="btn-primary flex items-center justify-center gap-2 px-6 md:px-8 w-full sm:w-auto">
                   <FaDiscord /> JOIN DISCORD
                 </a>
-                <Link href="/events">
-                  <button className="btn-outline px-8 cursor-pointer">
+                <Link href="/events" className="w-full sm:w-auto">
+                  <button className="btn-outline px-6 md:px-8 cursor-pointer w-full">
                     VIEW EVENTS
                   </button>
                 </Link>
@@ -95,57 +48,7 @@ export default function Home() {
 
         {/* Recent Champions Sidebar */}
         <div className="lg:col-span-4 order-2 flex flex-col">
-          <Card title="Recent Champions" centerTitle className="flex-1 border-pink-500/20 flex flex-col items-center">
-            {loading ? (
-              <div className="flex items-center justify-center flex-1">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-pink-500"></div>
-              </div>
-            ) : (
-              <div className="flex flex-col flex-1 w-full max-w-[320px] mx-auto text-center">
-                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar mb-6 flex-1">
-                  {recentEvents.length > 0 ? (
-                    recentEvents.map((event) => {
-                      const winner = event.standings?.nodes[0];
-                      if (!winner) return null;
-
-                      return (
-                        <div key={event.id} className="bg-white/5 p-4 rounded-xl flex flex-col gap-2 group/item hover:bg-white/10 transition-all border border-transparent hover:border-pink-500/30 items-center">
-                          <div className="flex justify-between items-start w-full">
-                            <div className="text-[10px] font-bold text-pink-500 uppercase tracking-widest">{event.videogame?.name || "Tournament"}</div>
-                            <div className="text-[10px] text-gray-500">{formatDate(event.startAt)}</div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-black font-black text-xs shadow-[0_0_10px_rgba(234,179,8,0.3)] flex-shrink-0">
-                              1
-                            </div>
-                            <div className="font-bold text-white group-hover/item:text-pink-400 transition-colors truncate">
-                              {winner.entrant.name}
-                            </div>
-                          </div>
-                          <div className="text-xs text-gray-400 truncate w-full">
-                            {event.tournament?.name || event.name}
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-64 text-gray-500 bg-white/5 rounded-xl border border-dashed border-white/10">
-                      <FaTrophy className="text-4xl mb-3 opacity-20" />
-                      <p className="font-medium">No recent winners found</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-auto pt-6 border-t border-white/5">
-                  <Link href="/events#past-events">
-                    <button className="text-[10px] font-black text-white hover:text-pink-400 transition-colors w-full py-4 bg-white/5 rounded-lg border border-white/10 hover:border-pink-500/40 cursor-pointer uppercase tracking-widest">
-                      View All Past Events →
-                    </button>
-                  </Link>
-                </div>
-              </div>
-            )}
-          </Card>
+          <RecentChampions />
         </div>
       </div>
 
@@ -272,30 +175,8 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              id: 1,
-              title: "Nameless Wins Winter Cup Championship",
-              excerpt: "Our Rocket League team took home the championship trophy in an intense final against the league leaders.",
-              date: "Dec 20, 2024",
-              image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800",
-            },
-            {
-              id: 2,
-              title: "New Roster Announcement",
-              excerpt: "We're excited to announce three new additions to our competitive Valorant roster for the upcoming season.",
-              date: "Dec 15, 2024",
-              image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800",
-            },
-            {
-              id: 3,
-              title: "Spring Season Registration Opens",
-              excerpt: "Registration for the Spring 2025 tournament series opens next month. Don't miss your chance to compete.",
-              date: "Dec 10, 2024",
-              image: "https://images.unsplash.com/photo-1560253023-3ec5d502959f?w=800",
-            },
-          ].map((article) => (
-            <Link key={article.id} href="/news" className="group">
+          {latestNews.map((article) => (
+            <a key={article.id} href={article.link} target="_blank" rel="noopener noreferrer" className="group">
               <Card className="overflow-hidden p-0 border-white/5 hover:border-pink-500/50 transition-all h-full flex flex-col">
                 <div className="h-56 w-full overflow-hidden">
                   <Image
@@ -310,7 +191,7 @@ export default function Home() {
                   <div className="flex items-center gap-2 text-[10px] font-bold text-pink-500 uppercase tracking-widest mb-3">
                     <FaCalendar /> {article.date}
                   </div>
-                  <h3 className="text-xl font-bold mb-3 group-hover:text-pink-400 transition-colors text-white leading-tight">
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-pink-400 transition-colors text-white leading-tight line-clamp-2">
                     {article.title}
                   </h3>
                   <p className="text-gray-400 text-sm mb-6 line-clamp-3 leading-relaxed">
@@ -321,7 +202,7 @@ export default function Home() {
                   </div>
                 </div>
               </Card>
-            </Link>
+            </a>
           ))}
         </div>
       </div>

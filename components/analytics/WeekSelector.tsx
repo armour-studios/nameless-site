@@ -76,10 +76,11 @@ export default function WeekSelector({ onWeekChange, selectedWeek }: WeekSelecto
     };
 
     const selectedWeekData = weeks.find(w => w.id === selectedWeek);
-    const displayName = selectedWeek === 'all' ? 'All Weeks' : selectedWeekData?.name || 'Select Week';
-    const eventCount = selectedWeek === 'all'
+    const isAllWeeks = selectedWeek === 'all';
+    const displayName = isAllWeeks ? 'All Weeks' : (selectedWeekData?.name || 'Select Week');
+    const eventCount = isAllWeeks
         ? weeks.reduce((sum, w) => sum + w.count, 0)
-        : selectedWeekData?.count || 0;
+        : (selectedWeekData?.count || 0);
 
     return (
         <div className="relative">
@@ -101,7 +102,7 @@ export default function WeekSelector({ onWeekChange, selectedWeek }: WeekSelecto
                         className="fixed inset-0 z-40"
                         onClick={() => setIsOpen(false)}
                     />
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 overflow-hidden max-h-96 overflow-y-auto">
                         <button
                             onClick={() => {
                                 onWeekChange('all');

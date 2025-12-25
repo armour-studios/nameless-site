@@ -46,7 +46,8 @@ async function parseRSS(xml: string, sourceName: string, category: 'Business' | 
     // Regex targets for diverse formats (RSS 2.0 and Atom)
     const items = xml.match(/<item>([\s\S]*?)<\/item>/g) || xml.match(/<entry>([\s\S]*?)<\/entry>/g) || [];
 
-    for (const item of items) {
+    for (let index = 0; index < items.length; index++) {
+        const item = items[index];
         const titleMatch = item.match(/<title[^>]*>([\s\S]*?)<\/title>/);
         const linkMatch = item.match(/<link>([\s\S]*?)<\/link>/) || item.match(/<link[^>]*href="([^"]*)"/);
         const descMatch = item.match(/<description>([\s\S]*?)<\/description>/) || item.match(/<summary[^>]*>([\s\S]*?)<\/summary>/) || item.match(/<content[^>]*>([\s\S]*?)<\/content>/) || item.match(/<itunes:summary>([\s\S]*?)<\/itunes:summary>/);
@@ -69,8 +70,13 @@ async function parseRSS(xml: string, sourceName: string, category: 'Business' | 
 
         if (!title || title === 'No title') continue;
 
+        // Generate unique ID using crypto hash to prevent any collisions
+        const crypto = require('crypto');
+        const uniqueString = `${sourceName}-${link}-${title}-${index}`;
+        const id = crypto.createHash('md5').update(uniqueString).digest('hex').slice(0, 16);
+
         articles.push({
-            id: Buffer.from(link).toString('base64').slice(0, 12),
+            id,
             title,
             excerpt,
             content: '',

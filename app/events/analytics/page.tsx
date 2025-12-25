@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import Card from "@/components/Card";
 import Link from "next/link";
-import SideNav from "@/components/analytics/SideNav";
 import LiveTicker from "@/components/analytics/LiveTicker";
-import WeekSelector from "@/components/analytics/WeekSelector";
+import AnalyticsFilters, { FilterState } from "@/components/analytics/AnalyticsFilters";
+import SideNav from "@/components/analytics/SideNav";
 import {
     FaTrophy,
     FaCalendar,
@@ -47,7 +47,7 @@ interface Tournament {
 export default function Analytics() {
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedWeek, setSelectedWeek] = useState<string>("all");
+    const [filters, setFilters] = useState<FilterState>({ eventTypes: [], dateRange: { start: '', end: '' } });
     const [showTicker, setShowTicker] = useState(true);
 
     useEffect(() => {
@@ -68,22 +68,40 @@ export default function Analytics() {
         }
     };
 
-    // Filter tournaments by selected week
-    const getWeekKey = (timestamp: number | null | undefined) => {
-        if (!timestamp) return null;
-        const date = new Date(timestamp * 1000);
-        const weekStart = new Date(date);
-        weekStart.setDate(date.getDate() - date.getDay());
-        weekStart.setHours(0, 0, 0, 0);
-        return weekStart.toISOString().split('T')[0];
+    // Determine event type based on tournament name
+    const getEventType = (tournament: Tournament): string => {
+        const name = tournament.name.toLowerCase();
+        if (name.includes('rocket rush')) return 'Rocket Rush';
+        if (name.includes('initiative')) return 'Initiative League';
+        return 'Other';
     };
 
-    const filteredTournaments = selectedWeek === 'all'
-        ? tournaments
-        : tournaments.filter(t => {
-            const weekKey = getWeekKey(t.startAt);
-            return weekKey === selectedWeek;
-        });
+    // Filter tournaments by event type and date range
+    const filteredTournaments = tournaments.filter(t => {
+        // Event type filter
+        if (filters.eventTypes.length > 0) {
+            const type = getEventType(t);
+            if (!filters.eventTypes.includes(type)) return false;
+        }
+
+        // Date range filter
+        if (t.startAt) {
+            const tournamentDate = new Date(t.startAt * 1000);
+
+            if (filters.dateRange.start) {
+                const startDate = new Date(filters.dateRange.start);
+                if (tournamentDate < startDate) return false;
+            }
+
+            if (filters.dateRange.end) {
+                const endDate = new Date(filters.dateRange.end);
+                endDate.setHours(23, 59, 59, 999); // Include entire end date
+                if (tournamentDate > endDate) return false;
+            }
+        }
+
+        return true;
+    });
 
     // Calculate analytics from filtered data
     const totalEvents = filteredTournaments.length;
@@ -191,29 +209,24 @@ export default function Analytics() {
 
     return (
         <div className="flex min-h-screen">
-            {/* Left Sidebar Navigation */}
             <SideNav />
 
             {/* Main Content */}
-            <main className="flex-1 pb-20 px-4 md:px-8">
-                {/* Header */}
-                <div className="pt-4 mb-6">
-                </div>
-
+            <main className="flex-1 pb-20 px-4 md:px-8 pt-16 md:pt-4">
                 <div className="mb-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                         <div>
-                            <h1 className="text-4xl md:text-6xl font-[family-name:var(--font-heading)] font-black text-white mb-2">
+                            <h1 className="text-3xl md:text-4xl lg:text-6xl font-[family-name:var(--font-heading)] font-black text-white mb-2">
                                 <span className="text-gradient">Analytics Hub</span>
                             </h1>
-                            <p className="text-gray-400 text-lg">Comprehensive insights into Nameless Esports tournament performance</p>
+                            <p className="text-gray-400 text-base md:text-lg">Comprehensive insights into Nameless Esports tournament performance</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Week Selector */}
+                {/* Filters */}
                 <div className="mb-8">
-                    <WeekSelector selectedWeek={selectedWeek} onWeekChange={setSelectedWeek} />
+                    <AnalyticsFilters onFilterChange={setFilters} />
                 </div>
 
                 {/* Key Metrics Overview - Mobile Optimized */}
@@ -542,7 +555,7 @@ export default function Analytics() {
             {/* Right Ticker Sidebar */}
             <aside className="w-80 bg-gray-900/50 border-l border-white/10 h-screen sticky top-0">
                 {showTicker ? (
-                    <LiveTicker weekFilter={selectedWeek} autoRefresh={true} />
+                    <LiveTicker autoRefresh={true} />
                 ) : (
                     <div className="p-4">
                         <h3 className="font-bold text-lg mb-4">Week Standings</h3>

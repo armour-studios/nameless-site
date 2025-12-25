@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Card from "@/components/Card";
 import Link from "next/link";
 import LiveTicker from "@/components/analytics/LiveTicker";
-import WeekSelector from "@/components/analytics/WeekSelector";
+import AnalyticsFilters, { FilterState } from "@/components/analytics/AnalyticsFilters";
 import SideNav from "@/components/analytics/SideNav";
 import CustomSelect from "@/components/CustomSelect";
 import {
@@ -57,7 +57,7 @@ interface TeamStats {
 
 export default function CasterDashboard() {
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
-    const [selectedWeek, setSelectedWeek] = useState<string>("all");
+    const [filters, setFilters] = useState<FilterState>({ eventTypes: [], dateRange: { start: '', end: '' } });
     const [team1, setTeam1] = useState<string>("");
     const [team2, setTeam2] = useState<string>("");
     const [loading, setLoading] = useState(true);
@@ -83,12 +83,53 @@ export default function CasterDashboard() {
         }
     };
 
-    // Process team statistics - FIXED to count ALL teams across ALL events
-    const teamStats = new Map<string, TeamStats>();
-    const totalEventsCount = tournaments.reduce((sum, t) => sum + (t.events?.length || 0), 0);
+    // Determine event type based on tournament name
+    const getEventType = (tournament: Tournament): string => {
+        const name = tournament.name.toLowerCase();
+        if (name.includes('rocket rush')) return 'Rocket Rush';
+        if (name.includes('initiative')) return 'Initiative League';
+        return 'Other';
+    };
 
-    // First pass: gather all teams from standings
-    tournaments.forEach(tournament => {
+    // Filter tournaments using new filter system
+    const filteredTournaments = tournaments.filter(t => {
+        // Event type filter
+        if (filters.eventTypes.length > 0) {
+            const type = getEventType(t);
+            if (!filters.eventTypes.includes(type)) return false;
+        }
+
+        // Date range filter
+        if (t.startAt) {
+            const tournamentDate = new Date(t.startAt * 1000);
+
+            if (filters.dateRange.start) {
+                const startDate = new Date(filters.dateRange.start);
+                if (tournamentDate < startDate) return false;
+            }
+
+            if (filters.dateRange.end) {
+                const endDate = new Date(filters.dateRange.end);
+                endDate.setHours(23, 59, 59, 999);
+                if (tournamentDate > endDate) return false;
+            }
+        }
+
+        return true;
+    });
+
+    // DEBUG: Log filter state and results
+    console.log('Caster Dashboard - Filters:', filters);
+    console.log('Caster Dashboard - Total tournaments:', tournaments.length);
+    console.log('Caster Dashboard - Filtered tournaments:', filteredTournaments.length);
+
+
+    // Process team statistics - FIXED to count ALL teams across ALL events from FILTERED data
+    const teamStats = new Map<string, TeamStats>();
+    const totalEventsCount = filteredTournaments.reduce((sum, t) => sum + (t.events?.length || 0), 0);
+
+    // First pass: gather all teams from standings in filtered tournaments
+    filteredTournaments.forEach(tournament => {
         tournament.events?.forEach(event => {
             const eventId = `${tournament.id}-${event.id}`;
             const entrants = event.numEntrants || 0;
@@ -205,9 +246,9 @@ export default function CasterDashboard() {
                     <p className="text-gray-400 text-lg">Real-time statistics and matchup analysis for broadcast teams</p>
                 </div>
 
-                {/* Week Selector */}
+                {/* Filters */}
                 <div className="mb-8">
-                    <WeekSelector selectedWeek={selectedWeek} onWeekChange={setSelectedWeek} />
+                    <AnalyticsFilters onFilterChange={setFilters} />
                 </div>
 
                 {/* Overview Stats */}
@@ -529,7 +570,7 @@ export default function CasterDashboard() {
 
             {/* Live Ticker Sidebar */}
             <aside className="w-80 bg-gray-900/50 border-l border-white/10 h-screen sticky top-0">
-                <LiveTicker weekFilter={selectedWeek} autoRefresh={true} />
+                <LiveTicker autoRefresh={true} />
             </aside>
         </div>
     );
