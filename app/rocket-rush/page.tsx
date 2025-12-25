@@ -311,6 +311,7 @@ export default function RocketRush() {
                                 TOP 6 TEAMS INVITED • 2 WILDCARDS
                             </p>
                         </div>
+                    </div>
                 </Card>
             </motion.div>
 
