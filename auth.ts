@@ -1,5 +1,4 @@
 import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
 import DiscordProvider from "next-auth/providers/discord";
@@ -7,7 +6,6 @@ import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-    adapter: PrismaAdapter(prisma),
     session: { strategy: "jwt" },
     pages: {
         signIn: "/login",
@@ -98,6 +96,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }),
     ],
     callbacks: {
+        async signIn({ user, account }) {
+            // For OAuth providers, create or update user in database
+            if (account?.provider !== "credentials") {
+                const existingUser = await prisma.user.findUnique({
+                    where: { email: user.email! },
+                });
+
+                if (!existingUser) {
+                    // Create new user from OAuth
+                    await prisma.user.create({
+                        data: {
+                            email: user.email!,
+                            name: user.name || null,
+                            image: user.image || null,
+                            emailVerified: new Date(),
+                        },
+                    });
+                }
+            }
+            return true;
+        },
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
