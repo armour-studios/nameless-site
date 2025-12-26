@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'images.start.gg',
+      },
+      {
+        protocol: 'https',
         hostname: 'esportsinsider.com',
       },
       {

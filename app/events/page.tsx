@@ -616,25 +616,41 @@ export default function Tournaments() {
                         )}
                     </Card>
 
-                    {/* Quick Stats */}
+                    {/* Community Impact */}
                     <Card className="bg-gradient-to-br from-purple-900/20 to-pink-900/20">
-                        <h3 className="text-lg font-bold mb-4">Season Stats</h3>
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-sm">Total Events</span>
-                                <span className="text-white font-bold text-lg">{tournaments.length}</span>
+                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                            <FaUsers className="text-pink-500" /> Community Impact
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                <span className="text-gray-400 text-sm">Total Competitors</span>
+                                <span className="text-white font-bold text-lg">
+                                    {tournaments.reduce((sum, t) => sum + (t.numAttendees || 0), 0).toLocaleString()}
+                                </span>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-sm">Completed</span>
+                            <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                <span className="text-gray-400 text-sm">Prize Money Paid</span>
                                 <span className="text-green-400 font-bold text-lg">
-                                    {tournaments.filter(t => getStatus(t) === 'completed').length}
+                                    ${(tournaments.filter(t => isRocketRush(t) && (getStatus(t) === 'completed' || getStatus(t) === 'past')).length * 100).toLocaleString()}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-sm">Upcoming</span>
-                                <span className="text-cyan-400 font-bold text-lg">
-                                    {tournaments.filter(t => getStatus(t) === 'upcoming').length}
-                                </span>
+                                <span className="text-gray-400 text-sm">Active Regions</span>
+                                <div className="flex -space-x-2">
+                                    {[...new Set(tournaments.map(t => t.countryCode).filter(Boolean))].slice(0, 5).map((code, i) => (
+                                        <div key={i} className="w-6 h-6 rounded-full bg-gray-800 border border-black flex items-center justify-center text-[10px] font-bold" title={code || ''}>
+                                            {code}
+                                        </div>
+                                    ))}
+                                    {[...new Set(tournaments.map(t => t.countryCode).filter(Boolean))].length > 5 && (
+                                        <div className="w-6 h-6 rounded-full bg-gray-700 border border-black flex items-center justify-center text-[8px] font-bold">
+                                            +{[...new Set(tournaments.map(t => t.countryCode).filter(Boolean))].length - 5}
+                                        </div>
+                                    )}
+                                    {[...new Set(tournaments.map(t => t.countryCode).filter(Boolean))].length === 0 && (
+                                        <span className="text-xs text-gray-500">Global</span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </Card>

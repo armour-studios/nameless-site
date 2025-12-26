@@ -126,8 +126,13 @@ function cleanText(text: string) {
         .trim();
 }
 
+import { prisma } from "@/lib/prisma";
+
+// ... existing code ...
+
 export async function getAllNews(): Promise<NewsArticle[]> {
     try {
+        // Fetch from RSS
         const allArticlesPromises = FEED_SOURCES.map(async (source) => {
             try {
                 const response = await fetch(source.url, {
@@ -142,18 +147,41 @@ export async function getAllNews(): Promise<NewsArticle[]> {
             }
         });
 
-        const results = await Promise.all(allArticlesPromises);
+        // Fetch from Database
+        const dbNewsPromise = prisma.newsArticle.findMany({
+            where: { published: true },
+            orderBy: { publishedAt: 'desc' }
+        }).then(articles => articles.map(article => ({
+            id: article.id,
+            title: article.title,
+            excerpt: article.excerpt || article.content.substring(0, 150) + "...",
+            content: article.content,
+            link: `/news/${article.slug}`, // Internal link
+            date: article.publishedAt ? article.publishedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
+            author: article.author || "Nameless Staff",
+            image: article.coverImage || "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80",
+            source: "Nameless Esports",
+            category: (article as any).category || "General"
+        })));
 
-        // Flatten, deduplicate by link, and sort
-        const flattened = results.flat();
+        const [rssResults, dbResults] = await Promise.all([
+            Promise.all(allArticlesPromises),
+            dbNewsPromise
+        ]);
+
+        const flattenedRss = rssResults.flat();
+        const allNews = [...dbResults, ...flattenedRss];
+
+        // Final pass of cleaning on RSS items only if needed, but db items are clean.
+        // ...
 
         // Final pass of cleaning on excerpts (just to be extra safe)
-        flattened.forEach(article => {
+        allNews.forEach(article => {
             article.title = cleanText(article.title);
             article.excerpt = cleanText(article.excerpt);
         });
 
-        const unique = Array.from(new Map(flattened.map(item => [item.link, item])).values());
+        const unique = Array.from(new Map(allNews.map(item => [item.link, item])).values());
 
         return unique.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     } catch (error) {

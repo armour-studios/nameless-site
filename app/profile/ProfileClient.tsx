@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { FaTwitter, FaDiscord, FaTwitch, FaEdit, FaGamepad, FaTrophy, FaCalendarAlt } from "react-icons/fa";
+import { FaTwitter, FaDiscord, FaTwitch, FaYoutube, FaEdit, FaGamepad, FaTrophy, FaCalendarAlt, FaUsers } from "react-icons/fa";
 import Card from "@/components/Card";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface ProfileClientProps {
     user: any;
@@ -13,6 +14,7 @@ interface ProfileClientProps {
 
 export default function ProfileClient({ user, tournamentResults }: ProfileClientProps) {
     const router = useRouter();
+    const { update } = useSession();
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         name: user.name || "",
@@ -22,9 +24,70 @@ export default function ProfileClient({ user, tournamentResults }: ProfileClient
         twitter: user.twitter || "",
         discord: user.discord || "",
         twitch: user.twitch || "",
+        youtube: user.youtube || "",
         startggSlug: user.startggSlug || "",
     });
+    // ... existing code ...
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+
+    const [syncing, setSyncing] = useState(false);
+
+    const handleSyncStartgg = async () => {
+        if (!formData.startggSlug) return;
+        setSyncing(true);
+        try {
+            const res = await fetch("/api/user/sync-startgg", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ slug: formData.startggSlug }),
+            });
+
+            if (!res.ok) throw new Error("Sync failed");
+
+            const data = await res.json();
+
+            setFormData(prev => ({
+                ...prev,
+                bio: data.bio || prev.bio,
+                image: data.image || prev.image,
+                bannerImage: data.bannerImage || prev.bannerImage,
+                // Only update name if it's empty or user wants to sync it (optional, maybe just bio/images for now)
+            }));
+            alert("Profile synced with Start.gg!");
+        } catch (error) {
+            console.error(error);
+            alert("Failed to sync with Start.gg");
+        } finally {
+            setSyncing(false);
+        }
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'image' | 'bannerImage') => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const uploadData = new FormData();
+        uploadData.append("file", file);
+
+        try {
+            setUploading(true);
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: uploadData,
+            });
+
+            if (!res.ok) throw new Error("Upload failed");
+
+            const data = await res.json();
+            setFormData(prev => ({ ...prev, [field]: data.url }));
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            alert("Failed to upload image");
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,11 +99,20 @@ export default function ProfileClient({ user, tournamentResults }: ProfileClient
                 body: JSON.stringify(formData),
             });
             if (res.ok) {
+                // Update session to reflect changes in navbar immediately
+                await update({
+                    name: formData.name,
+                    image: formData.image
+                });
                 setIsEditing(false);
                 router.refresh();
+            } else {
+                const errorData = await res.json();
+                alert(`Failed to save: ${errorData.error || "Unknown error"}`);
             }
         } catch (error) {
             console.error(error);
+            alert("An unexpected error occurred.");
         } finally {
             setLoading(false);
         }
@@ -95,18 +167,23 @@ export default function ProfileClient({ user, tournamentResults }: ProfileClient
                             {/* Socials */}
                             <div className="flex gap-3 mb-6">
                                 {user.twitter && (
-                                    <a href={`https://twitter.com/${user.twitter}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-[#1DA1F2]/20 text-[#1DA1F2] flex items-center justify-center hover:bg-[#1DA1F2]/30 transition-colors">
+                                    <a href={`https://twitter.com/${user.twitter}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors">
                                         <FaTwitter size={20} />
                                     </a>
                                 )}
                                 {user.discord && (
-                                    <div className="w-10 h-10 rounded-lg bg-[#5865F2]/20 text-[#5865F2] flex items-center justify-center" title={user.discord}>
+                                    <div className="w-10 h-10 rounded-lg bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors" title={user.discord}>
                                         <FaDiscord size={20} />
                                     </div>
                                 )}
                                 {user.twitch && (
-                                    <a href={`https://twitch.tv/${user.twitch}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-[#9146FF]/20 text-[#9146FF] flex items-center justify-center hover:bg-[#9146FF]/30 transition-colors">
+                                    <a href={`https://twitch.tv/${user.twitch}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors">
                                         <FaTwitch size={20} />
+                                    </a>
+                                )}
+                                {user.youtube && (
+                                    <a href={`https://youtube.com/@${user.youtube}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-lg bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors">
+                                        <FaYoutube size={20} />
                                     </a>
                                 )}
                             </div>
@@ -162,8 +239,8 @@ export default function ProfileClient({ user, tournamentResults }: ProfileClient
                                             </div>
                                             <div className="text-right flex-shrink-0">
                                                 <div className={`text-3xl font-black ${result.placement === 1 ? 'text-yellow-500' :
-                                                        result.placement === 2 ? 'text-gray-300' :
-                                                            result.placement === 3 ? 'text-amber-700' : 'text-gray-500'
+                                                    result.placement === 2 ? 'text-gray-300' :
+                                                        result.placement === 3 ? 'text-amber-700' : 'text-gray-500'
                                                     }`}>
                                                     #{result.placement}
                                                 </div>
@@ -243,31 +320,89 @@ export default function ProfileClient({ user, tournamentResults }: ProfileClient
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-400 mb-2">Profile Image URL</label>
-                                    <input
-                                        type="text"
-                                        value={formData.image}
-                                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                                        className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none"
-                                    />
+                                    <label className="block text-sm font-bold text-gray-400 mb-2">Profile Image</label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={formData.image}
+                                            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none"
+                                            placeholder="URL or Upload"
+                                        />
+                                        <label className={`cursor-pointer bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg px-4 flex items-center justify-center transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                            <span className="text-sm font-bold whitespace-nowrap">Upload</span>
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                accept="image/*"
+                                                disabled={uploading}
+                                                onChange={(e) => handleFileUpload(e, 'image')}
+                                            />
+                                        </label>
+                                        {formData.image && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, image: "" })}
+                                                className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-lg px-3 transition-colors"
+                                                title="Remove Image"
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                    {/* Preview */}
+                                    {formData.image && (
+                                        <div className="mt-3 w-20 h-20 relative rounded-full overflow-hidden border-2 border-white/10">
+                                            <Image src={formData.image} alt="Profile Preview" fill className="object-cover" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-400 mb-2">Banner Image URL</label>
-                                    <input
-                                        type="text"
-                                        value={formData.bannerImage}
-                                        onChange={(e) => setFormData({ ...formData, bannerImage: e.target.value })}
-                                        className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none"
-                                    />
+                                    <label className="block text-sm font-bold text-gray-400 mb-2">Banner Image</label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={formData.bannerImage}
+                                            onChange={(e) => setFormData({ ...formData, bannerImage: e.target.value })}
+                                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none"
+                                            placeholder="URL or Upload"
+                                        />
+                                        <label className={`cursor-pointer bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg px-4 flex items-center justify-center transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                            <span className="text-sm font-bold whitespace-nowrap">Upload</span>
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                accept="image/*"
+                                                disabled={uploading}
+                                                onChange={(e) => handleFileUpload(e, 'bannerImage')}
+                                            />
+                                        </label>
+                                        {formData.bannerImage && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, bannerImage: "" })}
+                                                className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-lg px-3 transition-colors"
+                                                title="Remove Image"
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                    {/* Preview */}
+                                    {formData.bannerImage && (
+                                        <div className="mt-3 w-full h-20 relative rounded-lg overflow-hidden border-2 border-white/10">
+                                            <Image src={formData.bannerImage} alt="Banner Preview" fill className="object-cover" />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                             <div>
                                 <h3 className="text-sm font-bold text-gray-400 mb-4 uppercase tracking-wider">Social Links</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
-                                            <FaTwitter className="text-[#1DA1F2]" />
+                                            <FaTwitter className="text-white" />
                                             <label className="text-sm">Twitter Handle</label>
                                         </div>
                                         <input
@@ -280,7 +415,7 @@ export default function ProfileClient({ user, tournamentResults }: ProfileClient
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
-                                            <FaDiscord className="text-[#5865F2]" />
+                                            <FaDiscord className="text-white" />
                                             <label className="text-sm">Discord</label>
                                         </div>
                                         <input
@@ -293,7 +428,7 @@ export default function ProfileClient({ user, tournamentResults }: ProfileClient
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
-                                            <FaTwitch className="text-[#9146FF]" />
+                                            <FaTwitch className="text-white" />
                                             <label className="text-sm">Twitch</label>
                                         </div>
                                         <input
@@ -301,6 +436,19 @@ export default function ProfileClient({ user, tournamentResults }: ProfileClient
                                             value={formData.twitch}
                                             onChange={(e) => setFormData({ ...formData, twitch: e.target.value })}
                                             placeholder="channel"
+                                            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <FaYoutube className="text-white" />
+                                            <label className="text-sm">YouTube</label>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={formData.youtube}
+                                            onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
+                                            placeholder="@channel"
                                             className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-pink-500 focus:outline-none"
                                         />
                                     </div>

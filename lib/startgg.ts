@@ -153,6 +153,17 @@ export async function fetchNamelessTournaments(): Promise<Tournament[]> {
                 name
                 displayName
               }
+              standings(query: {
+                perPage: 3
+                page: 1
+              }) {
+                nodes {
+                  placement
+                  entrant {
+                    name
+                  }
+                }
+              }
             }
           }
         }
@@ -524,27 +535,24 @@ export async function fetchUserResults(slug: string): Promise<any[]> {
   const query = `
     query UserResults($slug: String!) {
       user(slug: $slug) {
-        events(query: {
-          perPage: 10,
-          page: 1,
-          filter: {
-            videogameId: [13] # Rocket League
-          }
-        }) {
-          nodes {
-            id
-            name
-            numEntrants
-            state
-            tournament {
-              name
-              images {
-                url
-              }
-            }
-            userEntrant(query: {}) {
-              standing {
-                placement
+        player {
+          recentStandings(limit: 20) {
+            placement
+            entrant {
+              event {
+                id
+                name
+                videogame {
+                  id
+                }
+                numEntrants
+                state
+                tournament {
+                  name
+                  images {
+                    url
+                  }
+                }
               }
             }
           }
@@ -567,21 +575,88 @@ export async function fetchUserResults(slug: string): Promise<any[]> {
     const data = await response.json();
 
     if (data.errors) {
-      console.error('Start.gg API errors in fetchUserResults:', data.errors);
+      console.error('Start.gg API errors in fetchUserResults:', JSON.stringify(data.errors, null, 2));
       return [];
     }
 
-    return data.data?.user?.events?.nodes?.map((event: any) => ({
-      eventName: event.name,
-      tournamentName: event.tournament?.name,
-      tournamentImage: event.tournament?.images?.[0]?.url,
-      placement: event.userEntrant?.standing?.placement,
-      totalEntrants: event.numEntrants,
-      state: event.state
-    })).filter((e: any) => e.placement) || []; // Only return events with placements
+    const standings = data.data?.user?.player?.recentStandings || [];
+
+    return standings
+      .filter((s: any) => s.entrant?.event?.videogame?.id === 13) // Filter for Rocket League
+      .map((s: any) => ({
+        eventName: s.entrant?.event?.name,
+        tournamentName: s.entrant?.event?.tournament?.name,
+        tournamentImage: s.entrant?.event?.tournament?.images?.[0]?.url,
+        placement: s.placement,
+        totalEntrants: s.entrant?.event?.numEntrants,
+        state: s.entrant?.event?.state
+      }));
 
   } catch (error) {
     console.error('Error fetching user results:', error);
     return [];
+  }
+}
+
+/**
+ * Fetch detailed user profile from Start.gg
+ */
+export async function fetchStartggUserDetails(slug: string) {
+  const query = `
+    query UserDetails($slug: String!) {
+      user(slug: $slug) {
+        bio
+        genderPronoun
+        images {
+            url
+            type
+        }
+        location {
+            city
+            state
+            country
+        }
+        player {
+            gamerTag
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch(STARTGG_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({ query, variables: { slug } }),
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    if (data.errors) {
+      console.error("Start.gg API errors in fetchStartggUserDetails:", data.errors);
+      return null;
+    }
+
+    const user = data.data?.user;
+    if (!user) return null;
+
+    // Extract images
+    const profileImage = user.images?.find((img: any) => img.type === "profile")?.url;
+    const bannerImage = user.images?.find((img: any) => img.type === "banner")?.url;
+
+    return {
+      bio: user.bio,
+      location: user.location ? `${user.location.city || ''}, ${user.location.state || ''}`.replace(/^, |, $/g, '') : null,
+      gamerTag: user.player?.gamerTag,
+      image: profileImage,
+      bannerImage: bannerImage
+    };
+  } catch (error) {
+    console.error("Error fetching Start.gg user details:", error);
+    return null;
   }
 }

@@ -5,12 +5,14 @@ import { NextResponse } from "next/server";
 export async function PUT(request: Request) {
     try {
         const session = await auth();
+
         if (!session?.user?.email) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
         const data = await request.json();
-        const { name, bio, bannerImage, image, twitter, discord, twitch, startggSlug } = data;
+
+        const { name, bio, bannerImage, image, twitter, discord, twitch, youtube, startggSlug } = data;
 
         const updatedUser = await prisma.user.update({
             where: { email: session.user.email },
@@ -22,6 +24,7 @@ export async function PUT(request: Request) {
                 twitter,
                 discord,
                 twitch,
+                youtube,
                 startggSlug,
             },
         });

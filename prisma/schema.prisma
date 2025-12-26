@@ -27,6 +27,7 @@ model User {
   twitter       String?
   discord       String?
   twitch        String?
+  youtube       String?
   startggSlug   String?   // e.g. "jonzey" from start.gg/user/jonzey
   
   // 2FA fields
@@ -196,8 +197,15 @@ model NewsArticle {
   excerpt     String?
   coverImage  String?
   author      String?
+  category    String   @default("General")
   published   Boolean  @default(false)
   publishedAt DateTime?
+  
+  // SEO Fields
+  metaTitle       String?
+  metaDescription String?
+  keywords        String?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

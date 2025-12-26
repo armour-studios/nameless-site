@@ -38,7 +38,7 @@ export default function UserDropdown() {
     if (!session?.user) return null;
 
     const user = session.user;
-    const isAdmin = user.role === "admin" || user.email === "jones.shane1996@gmail.com"; // Temporary admin check
+    const canAccessAdmin = user.role === "admin" || user.role === "staff";
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -59,7 +59,6 @@ export default function UserDropdown() {
                         {user.name}
                         <FaChevronDown className={`text-xs transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                     </div>
-                    <div className="text-xs text-start text-gray-400 font-mono">LVL 1</div>
                 </div>
             </button>
 
@@ -96,13 +95,13 @@ export default function UserDropdown() {
                                     <FaUser className="text-gray-400" /> Dashboard
                                 </Link>
 
-                                {isAdmin && (
+                                {canAccessAdmin && (
                                     <Link
                                         href="/admin"
                                         onClick={() => setIsOpen(false)}
-                                        className="flex items-center gap-3 px-3 py-2 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-colors text-sm font-medium"
+                                        className="flex items-center gap-3 px-3 py-2 text-pink-400 hover:text-pink-300 hover:bg-pink-500/10 rounded-lg transition-colors text-sm font-medium"
                                     >
-                                        <FaShieldAlt /> Admin Dashboard
+                                        <FaShieldAlt /> {user.role === 'staff' ? 'Staff Dashboard' : 'Admin Dashboard'}
                                     </Link>
                                 )}
 

@@ -4,7 +4,8 @@ import Card from "@/components/Card";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { FaUsers, FaTrophy, FaNewspaper, FaCog, FaChartLine } from "react-icons/fa";
+import { FaUser, FaTrophy, FaCalendarAlt, FaGamepad } from "react-icons/fa";
+import Link from "next/link";
 
 export default function Dashboard() {
     const { data: session, status } = useSession();
@@ -12,7 +13,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         if (status === "unauthenticated") {
-            router.push("/");
+            router.push("/login");
         }
     }, [status, router]);
 
@@ -24,146 +25,70 @@ export default function Dashboard() {
         );
     }
 
-    if (!session) {
-        return null;
-    }
+    if (!session) return null;
 
     return (
         <main className="min-h-screen pt-8 pb-20 px-4 md:px-8 max-w-[1400px] mx-auto">
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-4xl md:text-6xl font-[family-name:var(--font-heading)] font-black text-white">
-                        Staff <span className="text-gradient">Dashboard</span>
+                        User <span className="text-gradient">Dashboard</span>
                     </h1>
                     <p className="text-gray-400 mt-2">Welcome back, {session.user?.name}</p>
                 </div>
+                {session.user.role === "admin" && (
+                    <Link href="/admin" className="px-6 py-2 bg-red-600/20 text-red-500 border border-red-500/30 rounded-lg hover:bg-red-600/30 transition-colors font-bold">
+                        Go to Admin Dashboard
+                    </Link>
+                )}
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <Card>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <div className="text-gray-400 text-sm mb-1">Total Users</div>
-                            <div className="text-3xl font-bold">2,847</div>
-                        </div>
-                        <FaUsers className="text-4xl text-pink-500/30" />
-                    </div>
-                </Card>
-
-                <Card>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <div className="text-gray-400 text-sm mb-1">Active Tournaments</div>
-                            <div className="text-3xl font-bold">8</div>
-                        </div>
-                        <FaTrophy className="text-4xl text-purple-500/30" />
-                    </div>
-                </Card>
-
-                <Card>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <div className="text-gray-400 text-sm mb-1">News Articles</div>
-                            <div className="text-3xl font-bold">24</div>
-                        </div>
-                        <FaNewspaper className="text-4xl text-cyan-500/30" />
-                    </div>
-                </Card>
-
-                <Card>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <div className="text-gray-400 text-sm mb-1">Monthly Growth</div>
-                            <div className="text-3xl font-bold">+18%</div>
-                        </div>
-                        <FaChartLine className="text-4xl text-green-500/30" />
-                    </div>
-                </Card>
-            </div>
-
-            {/* Management Tools */}
-            <h2 className="text-2xl font-bold mb-6">Management Tools</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                <Card className="cursor-pointer hover:scale-105 transition-transform">
-                    <div className="text-center py-6">
-                        <FaTrophy className="text-5xl text-pink-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold mb-2">Manage Tournaments</h3>
-                        <p className="text-gray-400 text-sm">Create, edit, and monitor tournament events</p>
-                    </div>
-                </Card>
-
-                <Card className="cursor-pointer hover:scale-105 transition-transform">
-                    <div className="text-center py-6">
-                        <FaNewspaper className="text-5xl text-purple-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold mb-2">News Editor</h3>
-                        <p className="text-gray-400 text-sm">Publish and manage news articles</p>
-                    </div>
-                </Card>
-
-                <Card className="cursor-pointer hover:scale-105 transition-transform">
-                    <div className="text-center py-6">
-                        <FaUsers className="text-5xl text-cyan-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold mb-2">User Management</h3>
-                        <p className="text-gray-400 text-sm">Manage user accounts and permissions</p>
-                    </div>
-                </Card>
-
-                <Card className="cursor-pointer hover:scale-105 transition-transform">
-                    <div className="text-center py-6">
-                        <FaCog className="text-5xl text-gray-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold mb-2">Settings</h3>
-                        <p className="text-gray-400 text-sm">Configure site settings and preferences</p>
-                    </div>
-                </Card>
-
-                <Card className="cursor-pointer hover:scale-105 transition-transform">
-                    <div className="text-center py-6">
-                        <FaChartLine className="text-5xl text-green-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold mb-2">Analytics</h3>
-                        <p className="text-gray-400 text-sm">View site traffic and engagement</p>
-                    </div>
-                </Card>
-
-                <Card className="cursor-pointer hover:scale-105 transition-transform">
-                    <div className="text-center py-6">
-                        <div className="text-5xl mb-4">🎓</div>
-                        <h3 className="text-xl font-bold mb-2">Initiative League</h3>
-                        <p className="text-gray-400 text-sm">Manage high school tournaments</p>
-                    </div>
-                </Card>
-
-            </div>
-
-            {/* Recent Activity */}
-            <h2 className="text-2xl font-bold mt-12 mb-6">Recent Activity</h2>
-            <Card>
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between py-3 border-b border-white/10">
-                        <div>
-                            <h4 className="font-semibold">New user registration</h4>
-                            <p className="text-sm text-gray-400">player_12345 joined</p>
+                {/* Profile Card */}
+                <Card className="col-span-1 md:col-span-1">
+                    <div className="flex flex-col items-center p-4">
+                        <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 mb-4 border-2 border-pink-500">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={session.user.image || "/placeholder-user.jpg"}
+                                alt={session.user.name || "User"}
+                                className="w-full h-full object-cover"
+                            />
                         </div>
-                        <span className="text-sm text-gray-500">5 min ago</span>
+                        <h2 className="text-xl font-bold text-white">{session.user.name}</h2>
+                        <p className="text-sm text-gray-500">{session.user.email}</p>
+
+                        <Link href="/profile" className="mt-6 w-full py-2 text-center bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors">
+                            View Public Profile
+                        </Link>
                     </div>
-                    <div className="flex items-center justify-between py-3 border-b border-white/10">
-                        <div>
-                            <h4 className="font-semibold">Tournament created</h4>
-                            <p className="text-sm text-gray-400">Winter Cup 2024</p>
+                </Card>
+
+                {/* Main Content */}
+                <div className="col-span-1 md:col-span-2 space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <Card className="p-6 cursor-pointer hover:bg-white/5 transition-colors">
+                            <FaGamepad className="text-3xl text-pink-500 mb-3" />
+                            <h3 className="font-bold text-lg mb-1">Competition Hub</h3>
+                            <p className="text-sm text-gray-400">Join tournaments and manage teams</p>
+                        </Card>
+                        <Card className="p-6 cursor-pointer hover:bg-white/5 transition-colors">
+                            <FaCalendarAlt className="text-3xl text-purple-500 mb-3" />
+                            <h3 className="font-bold text-lg mb-1">Upcoming Events</h3>
+                            <p className="text-sm text-gray-400">View schedule and registrations</p>
+                        </Card>
+                    </div>
+
+                    <Card className="p-6">
+                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <FaTrophy className="text-yellow-500" /> Recent Activity
+                        </h3>
+                        <div className="text-center py-8 text-gray-500">
+                            No recent activity found. Join a tournament to get started!
                         </div>
-                        <span className="text-sm text-gray-500">2 hours ago</span>
-                    </div>
-                    <div className="flex items-center justify-between py-3">
-                        <div>
-                            <h4 className="font-semibold">News article published</h4>
-                            <p className="text-sm text-gray-400">"Championship Recap"</p>
-                        </div>
-                        <span className="text-sm text-gray-500">1 day ago</span>
-                    </div>
+                    </Card>
                 </div>
-            </Card>
-
+            </div>
         </main>
     );
 }
