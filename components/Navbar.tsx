@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaDiscord, FaTwitter, FaUser, FaTwitch } from "react-icons/fa";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 import { useSession, signIn, signOut } from "next-auth/react";
+import UserDropdown from "./UserDropdown";
 import { Event } from "@/lib/startgg";
 import Image from "next/image";
 
@@ -168,15 +169,7 @@ export default function Navbar() {
                                     Loading...
                                 </div>
                             ) : session ? (
-                                <div className="flex items-center gap-3">
-                                    <span className="text-sm text-gray-300">{session.user?.name}</span>
-                                    <button
-                                        onClick={() => signOut()}
-                                        className="px-5 py-2.5 rounded-lg border border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white transition-all font-semibold"
-                                    >
-                                        Sign Out
-                                    </button>
-                                </div>
+                                <UserDropdown />
                             ) : (
                                 <Link href="/login">
                                     <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 transition-all font-semibold">

@@ -3,12 +3,12 @@ import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || "");
 
 export async function send2FACode(email: string, code: string) {
-    const msg = {
-        to: email,
-        from: process.env.SENDGRID_FROM_EMAIL || "noreply@namelessesports.com",
-        subject: "Your Nameless Esports 2FA Code",
-        text: `Your 2FA verification code is: ${code}. This code will expire in 5 minutes.`,
-        html: `
+  const msg = {
+    to: email,
+    from: process.env.SENDGRID_FROM_EMAIL || "noreply@namelessesports.com",
+    subject: "Your Nameless Esports 2FA Code",
+    text: `Your 2FA verification code is: ${code}. This code will expire in 5 minutes.`,
+    html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #8b5cf6;">Nameless Esports</h2>
         <p>Your 2FA verification code is:</p>
@@ -19,26 +19,26 @@ export async function send2FACode(email: string, code: string) {
         <p style="color: #6b7280; font-size: 12px;">If you didn't request this code, please ignore this email.</p>
       </div>
     `,
-    };
+  };
 
-    try {
-        await sgMail.send(msg);
-        return { success: true };
-    } catch (error) {
-        console.error("SendGrid error:", error);
-        return { success: false, error };
-    }
+  try {
+    await sgMail.send(msg);
+    return { success: true };
+  } catch (error) {
+    console.error("SendGrid error:", error);
+    return { success: false, error };
+  }
 }
 
 export async function sendVerificationEmail(email: string, token: string) {
-    const verifyUrl = `${process.env.NEXTAUTH_URL}/auth/verify?token=${token}`;
+  const verifyUrl = `${process.env.NEXTAUTH_URL}/auth/verify?token=${token}`;
 
-    const msg = {
-        to: email,
-        from: process.env.SENDGRID_FROM_EMAIL || "noreply@namelessesports.com",
-        subject: "Verify your Nameless Esports account",
-        text: `Please verify your email by clicking this link: ${verifyUrl}`,
-        html: `
+  const msg = {
+    to: email,
+    from: process.env.SENDGRID_FROM_EMAIL || "noreply@namelessesports.com",
+    subject: "Verify your Nameless Esports account",
+    text: `Please verify your email by clicking this link: ${verifyUrl}`,
+    html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #8b5cf6;">Welcome to Nameless Esports!</h2>
         <p>Please verify your email address by clicking the button below:</p>
@@ -51,13 +51,26 @@ export async function sendVerificationEmail(email: string, token: string) {
         <p style="color: #6b7280; font-size: 12px;">This link will expire in 24 hours.</p>
       </div>
     `,
-    };
+  };
 
-    try {
-        await sgMail.send(msg);
-        return { success: true };
-    } catch (error) {
-        console.error("SendGrid error:", error);
-        return { success: false, error };
+  // Dev mode fallback
+  if (!process.env.SENDGRID_API_KEY) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('📧 [DEV MODE] Email would be sent:');
+      console.log('To:', email);
+      console.log('Subject:', msg.subject);
+      console.log('Text:', msg.text);
+      return { success: true };
     }
+    console.error("SendGrid API key missing");
+    return { success: false, error: "SendGrid API key missing" };
+  }
+
+  try {
+    await sgMail.send(msg);
+    return { success: true };
+  } catch (error) {
+    console.error("SendGrid error:", error);
+    return { success: false, error };
+  }
 }
