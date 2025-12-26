@@ -148,18 +148,6 @@ export default function UserDropdown() {
 
                             <div className="h-px bg-white/10 my-2 mx-4"></div>
 
-                            <div className="px-2 space-y-1">
-                                <Link
-                                    href="/armoured"
-                                    onClick={() => setIsOpen(false)}
-                                    className="flex items-center gap-3 px-3 py-2 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 rounded-lg transition-colors text-sm font-medium"
-                                >
-                                    <FaMedal /> Become Armoured
-                                </Link>
-                            </div>
-
-                            <div className="h-px bg-white/10 my-2 mx-4"></div>
-
                             <div className="px-2">
                                 <button
                                     onClick={() => signOut()}
