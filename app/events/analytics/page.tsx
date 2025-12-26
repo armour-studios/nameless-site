@@ -40,6 +40,7 @@ interface Tournament {
                 placement: number;
                 entrant: {
                     name: string;
+                    initialSeedNum?: number;
                 };
             }[];
         };
@@ -80,8 +81,12 @@ export default function AnalyticsPage() {
         return 'Other';
     };
 
-    // Filter tournaments by event type and date range
+    // Filter tournaments by event type, date range, AND only past events
+    const now = Date.now() / 1000;
     const filteredTournaments = tournaments.filter(t => {
+        // Only include past tournaments (completed events)
+        if (t.startAt && t.startAt > now) return false;
+
         // Event type filter
         if (filters.eventTypes.length > 0) {
             const type = getEventType(t);
@@ -138,10 +143,13 @@ export default function AnalyticsPage() {
         return t.startAt && t.startAt > now;
     }).length;
 
-    // Count total game brackets (events)
-    const totalGameBrackets = filteredTournaments.reduce((sum, t) => sum + (t.events?.length || 0), 0);
+    // Count main brackets only (exclude top-cut/elimination brackets with < 10 teams)
+    const mainBrackets = filteredTournaments.reduce((sum, t) => {
+        const mainEvents = t.events?.filter(e => (e.numEntrants || 0) >= 10) || [];
+        return sum + mainEvents.length;
+    }, 0);
 
-    const avgTeamsPerEvent = totalGameBrackets > 0 ? Math.round(totalTeams / totalGameBrackets) : 0;
+    const avgTeamsPerEvent = mainBrackets > 0 ? Math.round(totalTeams / mainBrackets) : 0;
     const avgAttendeesPerEvent = totalEvents > 0 ? Math.round(totalAttendees / totalEvents) : 0;
 
     // League breakdown from filtered data
@@ -209,6 +217,73 @@ export default function AnalyticsPage() {
     const previousMonth = timelineData[timelineData.length - 2]?.[1] || 0;
     const monthOverMonthGrowth = previousMonth > 0 ? ((recentMonth - previousMonth) / previousMonth) * 100 : 0;
 
+    // NEW ANALYTICS: Upset Tracking
+    let totalUpsets = 0;
+    let biggestUpset = { differential: 0, winner: '', loser: '', winnerSeed: 0, loserSeed: 0 };
+
+    filteredTournaments.forEach(t => {
+        t.events?.forEach(e => {
+            e.standings?.nodes.forEach(standing => {
+                const finalPlacement = standing.placement;
+                const initialSeed = standing.entrant.initialSeedNum || standing.placement;
+
+                // Count as upset if finished significantly better than seed
+                if (initialSeed - finalPlacement >= 3) {
+                    totalUpsets++;
+                    const differential = initialSeed - finalPlacement;
+                    if (differential > biggestUpset.differential) {
+                        biggestUpset = {
+                            differential,
+                            winner: standing.entrant.name,
+                            loser: '',
+                            winnerSeed: initialSeed,
+                            loserSeed: finalPlacement
+                        };
+                    }
+                }
+            });
+        });
+    });
+
+    // NEW ANALYTICS: Bracket Performance / Seeding Accuracy
+    let seedingDeviations: number[] = [];
+    let perfectSeeds = 0;
+    let totalSeededEntrants = 0;
+
+    filteredTournaments.forEach(t => {
+        t.events?.forEach(e => {
+            e.standings?.nodes.forEach(standing => {
+                const finalPlacement = standing.placement;
+                const initialSeed = standing.entrant.initialSeedNum || finalPlacement;
+
+                if (initialSeed && finalPlacement <= 8) { // Only count top 8
+                    totalSeededEntrants++;
+                    const deviation = Math.abs(initialSeed - finalPlacement);
+                    seedingDeviations.push(deviation);
+
+                    if (deviation <= 1) perfectSeeds++; // Within 1 spot = accurate
+                }
+            });
+        });
+    });
+
+    const avgSeedDeviation = seedingDeviations.length > 0
+        ? seedingDeviations.reduce((a, b) => a + b, 0) / seedingDeviations.length
+        : 0;
+
+    const seedingAccuracy = totalSeededEntrants > 0
+        ? Math.round((perfectSeeds / totalSeededEntrants) * 100)
+        : 0;
+
+    // NEW ANALYTICS: Attendance Insights
+    const attendanceByEvent = filteredTournaments
+        .filter(t => (t.numAttendees || 0) > 0)
+        .map(t => t.numAttendees || 0);
+
+    const highestAttendance = attendanceByEvent.length > 0 ? Math.max(...attendanceByEvent) : 0;
+    const lowestAttendance = attendanceByEvent.length > 0 ? Math.min(...attendanceByEvent) : 0;
+
+
     if (loading) {
         return (
             <main className="min-h-screen pb-20 px-4 md:px-8 max-w-[1600px] mx-auto">
@@ -270,28 +345,47 @@ export default function AnalyticsPage() {
                     </Card>
                 </div>
 
-                {/* Engagement & Activity Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <Card className="bg-gradient-to-br from-blue-900/10 to-cyan-900/10 border-blue-500/30">
+                {/* NEW ANALYTICS: Upset Tracking & Attendance */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <Card className="bg-gradient-to-br from-orange-900/10 to-red-900/10 border-orange-500/30">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-gray-300">Participation</h3>
-                            <FaChartLine className="text-2xl text-blue-400" />
+                            <h3 className="text-lg font-bold text-gray-300">🔥 Upset Tracking</h3>
+                            <FaFire className="text-2xl text-orange-400" />
                         </div>
-                        <div className="text-3xl font-black text-white mb-1">
-                            {avgAttendeesPerEvent}
+                        <div className="space-y-3">
+                            <div>
+                                <div className="text-3xl font-black text-orange-400 mb-1">{totalUpsets}</div>
+                                <div className="text-sm text-gray-400">Total Upsets (3+ seed improvement)</div>
+                            </div>
+                            {biggestUpset.differential > 0 && (
+                                <div className="p-3 bg-orange-500/10 rounded-lg border border-orange-500/30">
+                                    <div className="text-xs text-gray-400 uppercase mb-1">Biggest Upset</div>
+                                    <div className="text-sm font-semibold text-white truncate">{biggestUpset.winner}</div>
+                                    <div className="text-xs text-orange-400">Seed {biggestUpset.winnerSeed} → Placed {biggestUpset.loserSeed} ({biggestUpset.differential} spots)</div>
+                                </div>
+                            )}
                         </div>
-                        <div className="text-sm text-gray-400">Avg Attendees/Event</div>
                     </Card>
 
                     <Card className="bg-gradient-to-br from-cyan-900/10 to-teal-900/10 border-cyan-500/30">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-gray-300">Competition</h3>
-                            <FaGamepad className="text-2xl text-cyan-400" />
+                            <h3 className="text-lg font-bold text-gray-300">📊 Attendance Insights</h3>
+                            <FaChartLine className="text-2xl text-cyan-400" />
                         </div>
-                        <div className="text-3xl font-black text-white mb-1">
-                            {avgTeamsPerEvent}
+                        <div className="grid grid-cols-3 gap-3">
+                            <div className="text-center">
+                                <div className="text-2xl font-black text-cyan-400 mb-1">{avgAttendeesPerEvent}</div>
+                                <div className="text-xs text-gray-400">Average</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-black text-green-400 mb-1">{highestAttendance}</div>
+                                <div className="text-xs text-gray-400">Highest</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-2xl font-black text-yellow-400 mb-1">{lowestAttendance}</div>
+                                <div className="text-xs text-gray-400">Lowest</div>
+                            </div>
                         </div>
-                        <div className="text-sm text-gray-400">Avg Teams/Event</div>
                     </Card>
                 </div>
 
@@ -415,36 +509,33 @@ export default function AnalyticsPage() {
                     </Card>
                 </div>
 
-                {/* Top Games & Top Performers */}
+                {/* NEW ANALYTICS: Bracket Performance & Top Performers */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <Card>
+                    <Card className="bg-gradient-to-br from-purple-900/10 to-indigo-900/10 border-purple-500/30">
                         <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                            <FaGamepad className="text-orange-400" /> Popular Games
+                            🎯 <span>Bracket Performance</span>
                         </h2>
-                        <div className="space-y-3">
-                            {topGames.map(([game, count], index) => (
-                                <div key={game} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${index === 0 ? 'bg-yellow-500 text-black' :
-                                            index === 1 ? 'bg-gray-400 text-black' :
-                                                index === 2 ? 'bg-orange-500 text-black' :
-                                                    'bg-white/10 text-gray-400'
-                                            }`}>
-                                            {index + 1}
-                                        </div>
-                                        <span className="font-semibold">{game}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-cyan-400 font-bold">{count} events</span>
-                                        <div className="w-24 bg-white/10 rounded-full h-2">
-                                            <div
-                                                className="bg-cyan-500 h-2 rounded-full transition-all"
-                                                style={{ width: `${topGames[0] ? (count / topGames[0][1]) * 100 : 0}%` }}
-                                            ></div>
-                                        </div>
-                                    </div>
+                        <div className="space-y-4">
+                            <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/30">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm text-gray-400">Seeding Accuracy</span>
+                                    <span className="text-xs text-purple-400">(Top 8 within ±1 spot)</span>
                                 </div>
-                            ))}
+                                <div className="text-4xl font-black text-purple-400">{seedingAccuracy}%</div>
+                                <div className="mt-2 bg-white/10 rounded-full h-2">
+                                    <div className="bg-purple-500 h-2 rounded-full transition-all" style={{ width: `${seedingAccuracy}%` }}></div>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-indigo-500/10 rounded-lg border border-indigo-500/30">
+                                <div className="text-sm text-gray-400 mb-2">Avg Placement Deviation</div>
+                                <div className="text-3xl font-black text-indigo-400">{avgSeedDeviation.toFixed(1)} spots</div>
+                                <div className="text-xs text-gray-500 mt-1">How far seeds finish from their starting position</div>
+                            </div>
+                            <div className="p-4 bg-cyan-500/10 rounded-lg border border-cyan-500/30">
+                                <div className="text-sm text-gray-400 mb-2">Competition Level</div>
+                                <div className="text-3xl font-black text-cyan-400">{avgTeamsPerEvent} teams/event</div>
+                                <div className="text-xs text-gray-500 mt-1">Average bracket size</div>
+                            </div>
                         </div>
                     </Card>
 
@@ -498,64 +589,7 @@ export default function AnalyticsPage() {
                     </Card>
                 </div>
 
-                {/* Timeline Charts */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Event Timeline */}
-                    <Card>
-                        <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                            <FaCalendar className="text-green-400" /> Event Timeline
-                        </h2>
-                        {timelineData.length > 0 ? (
-                            <div className="flex items-end justify-between gap-1 h-48">
-                                {timelineData.map(([month, count]) => {
-                                    const maxCount = Math.max(...timelineData.map(d => d[1]));
-                                    const height = maxCount > 0 ? (count / maxCount) * 100 : 0;
-                                    return (
-                                        <div key={month} className="flex-1 flex flex-col items-center gap-1">
-                                            <div className="text-xs text-cyan-400 font-bold">{count}</div>
-                                            <div
-                                                className="w-full bg-gradient-to-t from-cyan-500 to-blue-500 rounded-t transition-all hover:from-cyan-400 hover:to-blue-400 cursor-pointer"
-                                                style={{ height: `${height}%` }}
-                                                title={`${month}: ${count} events`}
-                                            ></div>
-                                            <div className="text-[10px] text-gray-500 transform rotate-45 origin-left mt-1">{month}</div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <p className="text-center text-gray-400 py-12">No timeline data available</p>
-                        )}
-                    </Card>
 
-                    {/* Team Growth Timeline */}
-                    <Card>
-                        <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                            <FaUsers className="text-purple-400" /> Team Participation Growth
-                        </h2>
-                        {teamGrowthData.length > 0 ? (
-                            <div className="flex items-end justify-between gap-1 h-48">
-                                {teamGrowthData.map(([month, count]) => {
-                                    const maxCount = Math.max(...teamGrowthData.map(d => d[1]));
-                                    const height = maxCount > 0 ? (count / maxCount) * 100 : 0;
-                                    return (
-                                        <div key={month} className="flex-1 flex flex-col items-center gap-1">
-                                            <div className="text-xs text-purple-400 font-bold">{count}</div>
-                                            <div
-                                                className="w-full bg-gradient-to-t from-purple-500 to-pink-500 rounded-t transition-all hover:from-purple-400 hover:to-pink-400 cursor-pointer"
-                                                style={{ height: `${height}%` }}
-                                                title={`${month}: ${count} teams`}
-                                            ></div>
-                                            <div className="text-[10px] text-gray-500 transform rotate-45 origin-left mt-1">{month}</div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <p className="text-center text-gray-400 py-12">No growth data available</p>
-                        )}
-                    </Card>
-                </div>
             </main>
 
             {/* Right Ticker Sidebar - Hidden on Mobile */}
