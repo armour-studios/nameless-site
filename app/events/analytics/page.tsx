@@ -126,13 +126,22 @@ export default function AnalyticsPage() {
         });
     });
 
-    const completedEvents = filteredTournaments.filter(t => t.state === 'COMPLETED').length;
+    // Check if event is completed by state or if it's in the past
+    const completedEvents = filteredTournaments.filter(t => {
+        if (t.state === 'COMPLETED') return true;
+        // Also count as completed if end time has passed
+        const now = Date.now() / 1000;
+        return t.startAt && t.startAt < now - (7 * 24 * 60 * 60); // Past events older than 7 days
+    }).length;
     const upcomingEvents = filteredTournaments.filter(t => {
         const now = Date.now() / 1000;
         return t.startAt && t.startAt > now;
     }).length;
 
-    const avgTeamsPerEvent = totalEvents > 0 ? Math.round(totalTeams / totalEvents) : 0;
+    // Count total game brackets (events)
+    const totalGameBrackets = filteredTournaments.reduce((sum, t) => sum + (t.events?.length || 0), 0);
+
+    const avgTeamsPerEvent = totalGameBrackets > 0 ? Math.round(totalTeams / totalGameBrackets) : 0;
     const avgAttendeesPerEvent = totalEvents > 0 ? Math.round(totalAttendees / totalEvents) : 0;
 
     // League breakdown from filtered data
@@ -246,8 +255,8 @@ export default function AnalyticsPage() {
                     </Card>
                     <Card className="text-center bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-500/30 p-4 sm:p-6">
                         <FaUsers className="text-3xl text-purple-400 mx-auto mb-2" />
-                        <div className="text-4xl font-black text-purple-400">{uniqueTeams.size}</div>
-                        <div className="text-sm text-gray-400 mt-1">Unique Teams</div>
+                        <div className="text-4xl font-black text-purple-400">{totalTeams}</div>
+                        <div className="text-sm text-gray-400 mt-1">Total Teams</div>
                     </Card>
                     <Card className="text-center bg-gradient-to-br from-pink-900/20 to-red-900/20 border-pink-500/30 p-4 sm:p-6">
                         <FaTrophy className="text-3xl text-pink-400 mx-auto mb-2" />
@@ -272,17 +281,6 @@ export default function AnalyticsPage() {
                             {avgAttendeesPerEvent}
                         </div>
                         <div className="text-sm text-gray-400">Avg Attendees/Event</div>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-purple-900/10 to-pink-900/10 border-purple-500/30">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-gray-300">Completion</h3>
-                            <FaTrophy className="text-2xl text-purple-400" />
-                        </div>
-                        <div className="text-3xl font-black text-white mb-1">
-                            {totalEvents > 0 ? Math.round((completedEvents / totalEvents) * 100) : 0}%
-                        </div>
-                        <div className="text-sm text-gray-400">Event Completion Rate</div>
                     </Card>
 
                     <Card className="bg-gradient-to-br from-cyan-900/10 to-teal-900/10 border-cyan-500/30">
