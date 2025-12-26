@@ -517,3 +517,71 @@ export async function fetchTournamentBySlug(slug: string): Promise<Tournament | 
     return null;
   }
 }
+/**
+ * Fetch a user's recent tournament results by slug
+ */
+export async function fetchUserResults(slug: string): Promise<any[]> {
+  const query = `
+    query UserResults($slug: String!) {
+      user(slug: $slug) {
+        events(query: {
+          perPage: 10,
+          page: 1,
+          filter: {
+            videogameId: [13] # Rocket League
+          }
+        }) {
+          nodes {
+            id
+            name
+            numEntrants
+            state
+            tournament {
+              name
+              images {
+                url
+              }
+            }
+            userEntrant(query: {}) {
+              standing {
+                placement
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  try {
+    const response = await fetch(STARTGG_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({ query, variables: { slug } }),
+      cache: 'no-store',
+    });
+
+    const data = await response.json();
+
+    if (data.errors) {
+      console.error('Start.gg API errors in fetchUserResults:', data.errors);
+      return [];
+    }
+
+    return data.data?.user?.events?.nodes?.map((event: any) => ({
+      eventName: event.name,
+      tournamentName: event.tournament?.name,
+      tournamentImage: event.tournament?.images?.[0]?.url,
+      placement: event.userEntrant?.standing?.placement,
+      totalEntrants: event.numEntrants,
+      state: event.state
+    })).filter((e: any) => e.placement) || []; // Only return events with placements
+
+  } catch (error) {
+    console.error('Error fetching user results:', error);
+    return [];
+  }
+}

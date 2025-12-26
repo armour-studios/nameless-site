@@ -21,6 +21,14 @@ model User {
   password      String?   // Hashed password for credentials login
   role          String    @default("user") // user, admin, moderator
   
+  // Profile fields
+  bio           String?
+  bannerImage   String?
+  twitter       String?
+  discord       String?
+  twitch        String?
+  startggSlug   String?   // e.g. "jonzey" from start.gg/user/jonzey
+  
   // 2FA fields
   twoFactorEnabled Boolean @default(false)
   twoFactorSecret  String?
