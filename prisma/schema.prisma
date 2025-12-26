@@ -209,3 +209,24 @@ model NewsArticle {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+model Invoice {
+  id              String   @id @default(cuid())
+  invoiceNumber   String   @unique
+  dealId          String?  // Reference to CRM deal (optional)
+  clientName      String
+  clientEmail     String
+  clientCompany   String?
+  amount          Decimal  @db.Decimal(10, 2)
+  description     String?
+  dueDate         DateTime?
+  status          String   @default("unpaid") // unpaid, paid, overdue, cancelled
+  paymentLink     String?  // Link for online payment
+  notes           String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  paidAt          DateTime?
+  
+  @@index([status])
+  @@index([clientEmail])
+}

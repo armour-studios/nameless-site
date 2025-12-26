@@ -137,12 +137,18 @@ export async function getAllNews(): Promise<NewsArticle[]> {
             try {
                 const response = await fetch(source.url, {
                     next: { revalidate: 3600 },
-                    headers: { 'User-Agent': 'Mozilla/5.0 (NamelessEsports News Aggregator)' }
+                    headers: { 'User-Agent': 'Mozilla/5.0 (NamelessEsports News Aggregator)' },
+                    signal: AbortSignal.timeout(5000) // 5 second timeout
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const xml = await response.text();
                 return parseRSS(xml, source.name, source.category);
             } catch (error) {
-                console.error(`Failed to fetch ${source.name}:`, error);
+                console.error(`[News] Failed to fetch ${source.name} (${source.url}):`, error instanceof Error ? error.message : error);
                 return [];
             }
         });

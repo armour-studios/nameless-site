@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getAllNews } from "@/utils/news";
 import RecentChampions from "@/components/homepage/RecentChampions";
+import YouTubeFeed from "@/components/YouTubeFeed";
 
 export const dynamic = 'force-dynamic';
 
@@ -206,6 +207,9 @@ export default async function Home() {
           ))}
         </div>
       </div>
+
+      {/* YouTube Feed Section */}
+      <YouTubeFeed />
 
       {/* Community / Final CTA */}
       <section className="relative py-24 rounded-[2rem] overflow-hidden text-center bg-[#0a0014] border border-white/5 mb-12">

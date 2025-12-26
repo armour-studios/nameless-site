@@ -6,11 +6,14 @@ import { useSession } from "next-auth/react";
 import {
     FaArrowLeft, FaSearch, FaFilter, FaPlus, FaEllipsisH, FaUserCircle,
     FaBuilding, FaDollarSign, FaList, FaColumns, FaTimes, FaCalendarAlt,
-    FaCheckCircle, FaExclamationCircle, FaArrowRight, FaTrash, FaTag, FaHistory, FaUndo, FaRobot, FaUpload, FaLink
+    FaCheckCircle, FaExclamationCircle, FaArrowRight, FaTrash, FaTag, FaHistory, FaUndo, FaRobot, FaUpload, FaLink, FaDownload
 } from "react-icons/fa";
+import { exportDealsToExcel, exportDealsToGoogleSheets, getFilteredDealsForExport } from "@/lib/crm-export";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { motion, AnimatePresence } from "framer-motion";
 import { DiscoveryView } from './DiscoveryView';
+import { ImprovedScraperModal } from '@/components/ImprovedScraperModal';
+import { ScraperTaskbar } from '@/components/ScraperTaskbar';
 import dynamic from "next/dynamic";
 import "react-quill-new/dist/quill.snow.css";
 
@@ -107,12 +110,12 @@ const STORAGE_KEY_DELETED = "nameless_crm_deleted";
 
 // --- Mock Data ---
 const INITIAL_DEALS: Deal[] = [
-    { id: "1", title: "Season 2 Sponsorship", value: 50000, company: "Red Bull", contact: "John Smith", priority: "high", probability: 20, dueDate: "2026-03-01", stage: "discovery", tags: ["Sponsors", "Rocket Rush"], locationState: "CA", notes: [], agent: { name: "John Doe", avatar: "https://ui-avatars.com/api/?name=John+Doe&background=0284c7&color=fff" } },
-    { id: "2", title: "Jersey Partner", value: 12000, company: "Adidas", contact: "Sarah Connor", priority: "medium", probability: 40, dueDate: "2026-02-15", stage: "qualified", tags: ["Sponsors"], locationState: "NY", notes: [{ id: "n1", text: "Sent initial pitch deck.", author: "Alex", date: "2023-12-01T10:00:00Z" }], agent: { name: "Jane Smith", avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=e11d48&color=fff" } },
-    { id: "3", title: "Streaming Rights", value: 25000, company: "Twitch", contact: "Mike Ross", priority: "high", probability: 60, dueDate: "2026-01-30", stage: "proposal", tags: ["Sponsors", "Rocket Rush"], locationState: "WA", notes: [], agent: { name: "Alex Johnson", avatar: "https://ui-avatars.com/api/?name=Alex+Johnson&background=7c3aed&color=fff" } },
-    { id: "4", title: "Hardware Supply", value: 15000, company: "Logitech", contact: "Harvey Specter", priority: "low", probability: 80, dueDate: "2026-04-10", stage: "negotiation", tags: ["Sponsors"], locationState: "TX", notes: [], agent: { name: "Sarah Williams", avatar: "https://ui-avatars.com/api/?name=Sarah+Williams&background=059669&color=fff" } },
-    { id: "5", title: "Local LAN Event", value: 3000, company: "City Council", contact: "Leslie Knope", priority: "medium", probability: 100, dueDate: "2025-12-20", stage: "won", tags: ["Nameless Initiative League"], locationState: "IN", notes: [], agent: { name: "John Doe", avatar: "https://ui-avatars.com/api/?name=John+Doe&background=0284c7&color=fff" } },
-    { id: "6", title: "Team Energy Drink", value: 8000, company: "Monster", contact: "Kyle Reese", priority: "medium", probability: 30, dueDate: "2026-02-01", stage: "discovery", tags: ["Sponsors"], locationState: "CA", notes: [], agent: { name: "Jane Smith", avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=e11d48&color=fff" } },
+    { id: "1", title: "Red Bull", value: 50000, company: "Season 2 Sponsorship", contact: "John Smith", priority: "high", probability: 20, dueDate: "2026-03-01", stage: "discovery", tags: ["Sponsors", "Rocket Rush"], locationState: "CA", notes: [], agent: { name: "John Doe", avatar: "https://ui-avatars.com/api/?name=John+Doe&background=0284c7&color=fff" } },
+    { id: "2", title: "Adidas", value: 12000, company: "Jersey Partner", contact: "Sarah Connor", priority: "medium", probability: 40, dueDate: "2026-02-15", stage: "qualified", tags: ["Sponsors"], locationState: "NY", notes: [{ id: "n1", text: "Sent initial pitch deck.", author: "Alex", date: "2023-12-01T10:00:00Z" }], agent: { name: "Jane Smith", avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=e11d48&color=fff" } },
+    { id: "3", title: "Twitch", value: 25000, company: "Streaming Rights", contact: "Mike Ross", priority: "high", probability: 60, dueDate: "2026-01-30", stage: "proposal", tags: ["Sponsors", "Rocket Rush"], locationState: "WA", notes: [], agent: { name: "Alex Johnson", avatar: "https://ui-avatars.com/api/?name=Alex+Johnson&background=7c3aed&color=fff" } },
+    { id: "4", title: "Logitech", value: 15000, company: "Hardware Supply", contact: "Harvey Specter", priority: "low", probability: 80, dueDate: "2026-04-10", stage: "negotiation", tags: ["Sponsors"], locationState: "TX", notes: [], agent: { name: "Sarah Williams", avatar: "https://ui-avatars.com/api/?name=Sarah+Williams&background=059669&color=fff" } },
+    { id: "5", title: "City Council", value: 3000, company: "Local LAN Event", contact: "Leslie Knope", priority: "medium", probability: 100, dueDate: "2025-12-20", stage: "won", tags: ["Nameless Initiative League"], locationState: "IN", notes: [], agent: { name: "John Doe", avatar: "https://ui-avatars.com/api/?name=John+Doe&background=0284c7&color=fff" } },
+    { id: "6", title: "Monster", value: 8000, company: "Team Energy Drink", contact: "Kyle Reese", priority: "medium", probability: 30, dueDate: "2026-02-01", stage: "discovery", tags: ["Sponsors"], locationState: "CA", notes: [], agent: { name: "Jane Smith", avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=e11d48&color=fff" } },
 ];
 
 export default function AdvancedCRM() {
@@ -128,28 +131,11 @@ export default function AdvancedCRM() {
     const [filterState, setFilterState] = useState<string>(""); // New: State filter
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [staffUsers, setStaffUsers] = useState<any[]>([]);
-
-    // --- Fetch Staff for Agents ---
-    useEffect(() => {
-        const fetchStaff = async () => {
-            try {
-                const res = await fetch('/api/admin/users');
-                if (res.ok) {
-                    const data = await res.json();
-                    // Filter for admin and staff roles (case-insensitive)
-                    const staff = data.filter((u: any) =>
-                        u.role?.toLowerCase() === 'admin' ||
-                        u.role?.toLowerCase() === 'staff'
-                    );
-                    setStaffUsers(staff);
-                }
-            } catch (err) {
-                console.error("Failed to fetch staff", err);
-            }
-        };
-        fetchStaff();
-    }, []);
+    const [backgroundScraperJob, setBackgroundScraperJob] = useState<any>(null); // Background job tracking
     const [isTrashOpen, setIsTrashOpen] = useState(false); // Trash Modal
+    const [isConfirmEmptyTrashOpen, setIsConfirmEmptyTrashOpen] = useState(false); // Confirmation Modal
+    const [isConfirmDeleteDealOpen, setIsConfirmDeleteDealOpen] = useState(false); // Delete Deal Confirmation
+    const [dealToDeleteId, setDealToDeleteId] = useState<string | null>(null); // Track which deal to delete
     const [isScraperOpen, setIsScraperOpen] = useState(false); // New: Scraper Modal
     const [scrapeUrls, setScrapeUrls] = useState("");
     const [isScraping, setIsScraping] = useState(false);
@@ -234,12 +220,55 @@ export default function AdvancedCRM() {
         }
     }, [deletedDeals, isLoaded]);
 
+    // --- Fetch Staff for Agents ---
+    useEffect(() => {
+        const fetchStaff = async () => {
+            try {
+                const res = await fetch('/api/admin/users');
+                if (res.ok) {
+                    const data = await res.json();
+                    // Filter for admin and staff roles (case-insensitive)
+                    const staff = data.filter((u: any) =>
+                        u.role?.toLowerCase() === 'admin' ||
+                        u.role?.toLowerCase() === 'staff'
+                    );
+                    setStaffUsers(staff);
+                }
+            } catch (err) {
+                console.error("Failed to fetch staff", err);
+            }
+        };
+        fetchStaff();
+    }, []);
+
+    // Poll background scraper job status
+    useEffect(() => {
+        if (!backgroundScraperJob || backgroundScraperJob.status !== 'processing') return;
+
+        const interval = setInterval(async () => {
+            try {
+                const response = await fetch(`/api/scrape/ai?jobId=${backgroundScraperJob.id}`);
+                const data = await response.json();
+                if (data.job) {
+                    setBackgroundScraperJob(data.job);
+                }
+            } catch (error) {
+                console.error('Error polling scraper job:', error);
+            }
+        }, 500);
+
+        return () => clearInterval(interval);
+    }, [backgroundScraperJob]);
+
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
-    const [activeTab, setActiveTab] = useState<'details' | 'notes'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'notes' | 'invoices'>('details');
+    const [invoices, setInvoices] = useState<any[]>([]);
+    const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
     const [newNote, setNewNote] = useState("");
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     // Image/Logo State
     const [imageUrl, setImageUrl] = useState("");
@@ -256,10 +285,13 @@ export default function AdvancedCRM() {
             setSelectedAgentId(editingDeal.agentId || "");
             setAgentSearch(editingDeal.agent?.name || "");
             setImageUrl(editingDeal.image || "");
+            // Fetch invoices for this deal
+            fetchInvoicesForDeal(editingDeal.id);
         } else if (isModalOpen) {
             setSelectedAgentId("");
             setAgentSearch("");
             setImageUrl("");
+            setInvoices([]);
         }
     }, [isModalOpen, editingDeal]);
 
@@ -305,9 +337,56 @@ export default function AdvancedCRM() {
         const dealIndex = newDeals.findIndex(d => d.id === draggableId);
         if (dealIndex === -1) return;
 
-        const updatedDeal = { ...newDeals[dealIndex], stage: destination.droppableId };
+        const deal = newDeals[dealIndex];
+        const updatedDeal = { ...deal, stage: destination.droppableId };
         newDeals[dealIndex] = updatedDeal;
         setDeals(newDeals);
+
+        // Create invoice if deal moved to "won" (Closed Won)
+        if (destination.droppableId === 'won' && source.droppableId !== 'won') {
+            createInvoiceForDeal(updatedDeal);
+        }
+    };
+
+    const createInvoiceForDeal = async (deal: Deal) => {
+        try {
+            const response = await fetch('/api/invoices/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    dealId: deal.id,
+                    clientName: deal.company,
+                    clientEmail: deal.email || '',
+                    clientCompany: deal.company,
+                    amount: deal.value,
+                    description: `Nameless Esports Services - ${deal.title}`,
+                    dueDate: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Invoice created:', data.invoice);
+                // Refresh invoices if deal is currently selected
+                if (editingDeal?.id === deal.id) {
+                    fetchInvoicesForDeal(deal.id);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to create invoice:', error);
+        }
+    };
+
+    const fetchInvoicesForDeal = async (dealId: string) => {
+        try {
+            const response = await fetch(`/api/invoices?dealId=${dealId}`);
+            if (response.ok) {
+                const data = await response.json();
+                setInvoices(data.invoices);
+            }
+        } catch (error) {
+            console.error('Failed to fetch invoices:', error);
+        }
     };
 
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -377,17 +456,32 @@ export default function AdvancedCRM() {
     };
 
     const handleDeleteDeal = (id: string) => {
-        console.log("Soft deleting deal with ID:", id);
-
         const dealToDelete = deals.find(d => d.id === id);
         if (dealToDelete) {
             const deletedDeal = { ...dealToDelete, deletedAt: new Date().toISOString() };
             setDeletedDeals(prev => [deletedDeal, ...prev]);
             setDeals(prev => prev.filter(d => d.id !== id));
+            setIsModalOpen(false);
+            setEditingDeal(null);
+        }
+    };
+
+    const confirmDeleteDeal = () => {
+        if (!dealToDeleteId) return;
+
+        console.log("Soft deleting deal with ID:", dealToDeleteId);
+
+        const dealToDelete = deals.find(d => d.id === dealToDeleteId);
+        if (dealToDelete) {
+            const deletedDeal = { ...dealToDelete, deletedAt: new Date().toISOString() };
+            setDeletedDeals(prev => [deletedDeal, ...prev]);
+            setDeals(prev => prev.filter(d => d.id !== dealToDeleteId));
         }
 
         setIsModalOpen(false);
         setEditingDeal(null);
+        setIsConfirmDeleteDealOpen(false);
+        setDealToDeleteId(null);
     };
 
     const handleRestoreDeal = (id: string) => {
@@ -469,6 +563,25 @@ export default function AdvancedCRM() {
         setDeals(prev => prev.map(d => d.id === editingDeal.id ? updatedDeal : d));
         setEditingDeal(updatedDeal);
         setNewNote("");
+    };
+
+    const updateInvoiceStatus = async (invoiceId: string, status: string) => {
+        try {
+            const response = await fetch(`/api/invoices/${invoiceId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status }),
+            });
+
+            if (response.ok) {
+                // Refresh invoices
+                if (editingDeal) {
+                    fetchInvoicesForDeal(editingDeal.id);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to update invoice status:', error);
+        }
     };
 
     const handleScrape = async () => {
@@ -739,6 +852,82 @@ export default function AdvancedCRM() {
                         >
                             <FaList className="text-sm" />
                         </button>
+
+                        <div className="h-4 w-px bg-white/10 mx-1"></div>
+
+                        {/* Export to Excel */}
+                        <button
+                            onClick={() => {
+                                try {
+                                    const dealsToExport = getFilteredDealsForExport(deals, searchQuery, filterTags, filterState);
+                                    setToast({ message: 'Exporting to CSV...', type: 'success' });
+
+                                    // Create CSV content
+                                    const headers = ['Deal Title', 'Company', 'Contact', 'Value', 'Stage', 'Priority', 'Probability', 'Due Date', 'Email', 'Phone', 'State', 'Tags', 'Assigned Agent', 'Notes'];
+                                    const rows = dealsToExport.map(deal => [
+                                        deal.title,
+                                        deal.company,
+                                        deal.contact,
+                                        deal.value,
+                                        deal.stage,
+                                        deal.priority,
+                                        deal.probability,
+                                        deal.dueDate ? new Date(deal.dueDate).toLocaleDateString() : '',
+                                        deal.email || '',
+                                        deal.phone || '',
+                                        deal.locationState || '',
+                                        deal.tags?.join(';') || '',
+                                        deal.agent?.name || 'Unassigned',
+                                        deal.notes?.length || 0
+                                    ]);
+
+                                    // Escape CSV values and create CSV string
+                                    const csvContent = [
+                                        headers.map(h => `"${h}"`).join(','),
+                                        ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+                                    ].join('\n');
+
+                                    // Create download link using data URL
+                                    const element = document.createElement('a');
+                                    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+                                    element.setAttribute('download', `deals-${new Date().toISOString().split('T')[0]}.csv`);
+                                    element.style.display = 'none';
+                                    document.body.appendChild(element);
+                                    element.click();
+                                    document.body.removeChild(element);
+
+                                    setToast({ message: 'CSV file downloaded!', type: 'success' });
+                                    setTimeout(() => setToast(null), 3000);
+                                } catch (error) {
+                                    console.error('Export error:', error);
+                                    setToast({ message: 'Failed to export CSV', type: 'error' });
+                                    setTimeout(() => setToast(null), 3000);
+                                }
+                            }}
+                            className="p-2 rounded-lg text-green-400 hover:text-green-300 hover:bg-green-500/10 transition-all"
+                            title="Export to Excel"
+                        >
+                            <FaDownload className="text-sm" />
+                        </button>
+
+                        {/* Export to Google Sheets */}
+                        <button
+                            onClick={async () => {
+                                const dealsToExport = getFilteredDealsForExport(deals, searchQuery, filterTags, filterState);
+                                const success = await exportDealsToGoogleSheets(dealsToExport);
+                                if (success) {
+                                    setToast({ message: 'Deal data copied to clipboard! Paste into Google Sheets.', type: 'success' });
+                                    setTimeout(() => setToast(null), 3000);
+                                } else {
+                                    setToast({ message: 'Failed to copy. Downloading as CSV instead...', type: 'error' });
+                                    setTimeout(() => setToast(null), 3000);
+                                }
+                            }}
+                            className="p-2 rounded-lg text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 transition-all"
+                            title="Export to Google Sheets (Copy to Clipboard)"
+                        >
+                            <FaDownload className="text-sm" />
+                        </button>
                     </div>
 
                     {/* Final Action Button */}
@@ -981,9 +1170,9 @@ export default function AdvancedCRM() {
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-[#1a1a1a] border-b border-white/5 text-gray-400 text-xs uppercase tracking-wider">
-                                        <th className="p-4 font-semibold">Deal Name</th>
-                                        <th className="p-4 font-semibold">Stage</th>
                                         <th className="p-4 font-semibold">Company</th>
+                                        <th className="p-4 font-semibold">Stage</th>
+                                        <th className="p-4 font-semibold">Deal Name</th>
                                         <th className="p-4 font-semibold">Value</th>
                                         <th className="p-4 font-semibold">Tags</th>
                                         <th className="p-4 font-semibold">Probability</th>
@@ -994,14 +1183,21 @@ export default function AdvancedCRM() {
                                 <tbody className="divide-y divide-white/5">
                                     {(view === 'list' ? filteredDeals.filter(d => d.stage === 'won') : filteredDeals).map(deal => (
                                         <tr key={deal.id} className="hover:bg-white/5 transition-colors group cursor-pointer" onClick={() => { setEditingDeal(deal); setIsModalOpen(true); }}>
-                                            <td className="p-4 font-medium text-white group-hover:text-pink-400">{deal.title}</td>
+                                            <td className="p-4 font-medium text-white group-hover:text-pink-400">
+                                                <div className="flex items-center gap-2">
+                                                    {deal.image && (
+                                                        <img src={deal.image} alt="" className="w-6 h-6 rounded border border-white/10 object-cover" />
+                                                    )}
+                                                    {deal.title}
+                                                </div>
+                                            </td>
                                             <td className="p-4">
                                                 <span className={`px-2 py-1 rounded text-xs font-semibold ${columns[deal.stage]?.color?.replace('bg-', 'text-').replace('400', '300') || 'text-gray-400'} bg-white/5`}>
                                                     {columns[deal.stage]?.title || deal.stage}
                                                 </span>
                                             </td>
-                                            <td className="p-4 text-gray-400 flex items-center gap-2">
-                                                <FaBuilding className="text-xs" /> {deal.company}
+                                            <td className="p-4 text-gray-400">
+                                                {deal.company}
                                             </td>
                                             <td className="p-4 font-mono text-green-400">${deal.value.toLocaleString()}</td>
                                             <td className="p-4">
@@ -1081,6 +1277,15 @@ export default function AdvancedCRM() {
                                             >
                                                 Notes <span className="bg-white/10 px-1 rounded-full text-[9px]">{editingDeal.notes?.length || 0}</span>
                                             </button>
+                                            {editingDeal.stage === 'won' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setActiveTab('invoices')}
+                                                    className={`px-3 py-1 text-xs font-semibold rounded transition-colors flex items-center gap-1 ${activeTab === 'invoices' ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}
+                                                >
+                                                    Invoices <span className="bg-white/10 px-1 rounded-full text-[9px]">{invoices?.length || 0}</span>
+                                                </button>
+                                            )}
                                         </div>
                                     )}
 
@@ -1143,7 +1348,7 @@ export default function AdvancedCRM() {
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <label className="block text-xs uppercase tracking-wider text-gray-500 mb-1">School Name / Deal Title</label>
+                                                        <label className="block text-xs uppercase tracking-wider text-gray-500 mb-1">Company Name</label>
                                                         <input name="title" type="text" defaultValue={editingDeal?.title} required placeholder="e.g. Nameless High" className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:border-pink-500 outline-none transition-colors" />
                                                     </div>
                                                 </div>
@@ -1163,7 +1368,7 @@ export default function AdvancedCRM() {
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-xs uppercase tracking-wider text-gray-500 mb-1">Company</label>
+                                                    <label className="block text-xs uppercase tracking-wider text-gray-500 mb-1">Deal Name</label>
                                                     <input name="company" type="text" defaultValue={editingDeal?.company} required className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:border-pink-500 outline-none transition-colors" />
                                                 </div>
                                                 <div>
@@ -1320,8 +1525,7 @@ export default function AdvancedCRM() {
                                                 {isAgentDropdownOpen && <div className="h-60" />}
                                             </div>
                                         </>
-                                    ) : (
-                                        /* --- NOTES TAB --- */
+                                    ) : activeTab === 'notes' ? (
                                         <div className="flex flex-col h-full min-h-0">
                                             <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2 min-h-0">
                                                 {editingDeal?.notes?.length === 0 ? (
@@ -1373,7 +1577,61 @@ export default function AdvancedCRM() {
                                                 </button>
                                             </div>
                                         </div>
-                                    )}
+                                    ) : activeTab === 'invoices' ? (
+                                        <div className="flex flex-col h-full min-h-0">
+                                            {invoices.length === 0 ? (
+                                                <div className="text-center text-gray-600 italic py-10">
+                                                    <p className="mb-2">No invoices yet.</p>
+                                                    <p className="text-xs">Create one to send a payment request.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+                                                    {invoices.map((invoice: any) => (
+                                                        <div key={invoice.id} className="bg-white/5 p-4 rounded-lg border border-white/10 hover:border-white/20 transition-all">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <div>
+                                                                    <h4 className="font-bold text-white">{invoice.invoiceNumber}</h4>
+                                                                    <p className="text-sm text-gray-400">{invoice.clientName}</p>
+                                                                </div>
+                                                                <span className={
+                                                                    invoice.status === 'paid' ? 'text-xs px-2 py-1 rounded-full font-semibold bg-green-500/20 text-green-400' :
+                                                                        invoice.status === 'unpaid' ? 'text-xs px-2 py-1 rounded-full font-semibold bg-yellow-500/20 text-yellow-400' :
+                                                                            invoice.status === 'overdue' ? 'text-xs px-2 py-1 rounded-full font-semibold bg-red-500/20 text-red-400' :
+                                                                                'text-xs px-2 py-1 rounded-full font-semibold bg-gray-500/20 text-gray-400'
+                                                                }>
+                                                                    {invoice.status.toUpperCase()}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                                                                <span className="text-lg font-bold text-pink-500">${parseFloat(invoice.amount).toFixed(2)}</span>
+                                                                <div className="flex gap-2">
+                                                                    {invoice.status === 'unpaid' && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => updateInvoiceStatus(invoice.id, 'paid')}
+                                                                            className="text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30 px-3 py-1 rounded transition-colors"
+                                                                        >
+                                                                            Mark Paid
+                                                                        </button>
+                                                                    )}
+                                                                    {invoice.paymentLink && (
+                                                                        <a
+                                                                            href={invoice.paymentLink}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 px-3 py-1 rounded transition-colors"
+                                                                        >
+                                                                            Pay
+                                                                        </a>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : null}
                                 </div>
 
                                 <div className="p-6 border-t border-white/10 bg-[#1a1a1a] flex justify-between items-center gap-3 shrink-0">
@@ -1477,7 +1735,9 @@ export default function AdvancedCRM() {
 
                             {deletedDeals.length > 0 && (
                                 <div className="p-4 bg-[#1a1a1a] border-t border-white/10 text-center">
-                                    <button type="button" onClick={() => { if (confirm("Empty trash? This deletes all items permanently.")) setDeletedDeals([]); }}
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsConfirmEmptyTrashOpen(true)}
                                         className="text-xs text-gray-500 hover:text-red-400 transition-colors"
                                     >
                                         Empty Trash
@@ -1491,134 +1751,71 @@ export default function AdvancedCRM() {
 
             {/* --- Scraper Modal --- */}
             <AnimatePresence>
-                {isScraperOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-                        onClick={(e) => { if (e.target === e.currentTarget) setIsScraperOpen(false); }}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.95, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.95, y: 20 }}
-                            className="bg-[#151515] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90%]"
-                        >
-                            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-[#1a1a1a]">
-                                <h2 className="text-xl font-bold text-white flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center">
-                                        <FaRobot className="text-pink-500" />
-                                    </div>
-                                    Lead Scraper
-                                </h2>
-                                <button onClick={() => setIsScraperOpen(false)} className="text-gray-500 hover:text-white transition-colors">
-                                    <FaTimes size={20} />
-                                </button>
-                            </div>
+                {/* --- Improved Scraper Modal --- */}
+                <ImprovedScraperModal
+                    isOpen={isScraperOpen}
+                    onClose={() => setIsScraperOpen(false)}
+                    activeJob={backgroundScraperJob}
+                    onJobStart={(job) => {
+                        setBackgroundScraperJob(job);
+                    }}
+                    onJobCancel={() => {
+                        setBackgroundScraperJob(null);
+                    }}
+                    onJobImport={(results) => {
+                        const newPending: PendingLead[] = results
+                            .filter((r: any) => r.success || r.title)
+                            .map((r: any) => ({
+                                id: Math.random().toString(36).substr(2, 9),
+                                title: r.title || "Scraped Lead",
+                                company: r.title || r.company || "Unknown Company",
+                                contact: r.contact || r.emails?.[0] || (r.phones?.[0] ? r.phones[0] : "No Contact Found"),
+                                value: r.value || 0,
+                                priority: r.priority || 'medium',
+                                probability: r.probability || 10,
+                                dueDate: "2026-06-01",
+                                stage: importFilters.defaultStage,
+                                tags: ['Scraped', ...(importFilters.customTags ? importFilters.customTags.split(',').map(t => t.trim()) : [])],
+                                locationState: r.state || '',
+                                notes: [],
+                                email: r.emails?.[0] || r.email || '',
+                                phone: r.phones?.[0] || r.phone || '',
+                                status: 'pending'
+                            }));
 
-                            <div className="p-6 overflow-y-auto flex-1 min-h-0">
-                                <div className="bg-pink-500/5 border border-pink-500/20 p-4 rounded-xl mb-6 text-sm text-pink-200/80 leading-relaxed shadow-inner">
-                                    <p>
-                                        {isSearchMode
-                                            ? "Enter school or company names (one per line). We'll find their websites and extract contact info automatically."
-                                            : "Enter website URLs (one per line). The AI will crawl the sites to extract emails, phones, and social links."}
-                                    </p>
-                                </div>
+                        if (newPending.length > 0) {
+                            setPendingLeads(prev => [...prev, ...newPending]);
+                            setIsReviewQueueOpen(true);
+                            setBackgroundScraperJob(null);
+                        }
+                    }}
+                    onResults={(results) => {
+                        const newPending: PendingLead[] = results
+                            .filter((r: any) => r.success || r.title)
+                            .map((r: any) => ({
+                                id: Math.random().toString(36).substr(2, 9),
+                                title: r.title || "Scraped Lead",
+                                company: r.title || r.company || "Unknown Company",
+                                contact: r.contact || r.emails?.[0] || (r.phones?.[0] ? r.phones[0] : "No Contact Found"),
+                                value: r.value || 0,
+                                priority: r.priority || 'medium',
+                                probability: r.probability || 10,
+                                dueDate: "2026-06-01",
+                                stage: importFilters.defaultStage,
+                                tags: ['Scraped', ...(importFilters.customTags ? importFilters.customTags.split(',').map(t => t.trim()) : [])],
+                                locationState: r.state || '',
+                                notes: [],
+                                email: r.emails?.[0] || r.email || '',
+                                phone: r.phones?.[0] || r.phone || '',
+                                status: 'pending'
+                            }));
 
-                                <div className="flex items-center justify-between mb-6 p-4 bg-white/5 rounded-2xl border border-white/10 shadow-lg">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isSearchMode ? 'bg-pink-500 text-white shadow-lg shadow-pink-500/40' : 'bg-white/5 text-gray-500'}`}>
-                                            <FaSearch size={14} />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-white">Advanced Search Mode</p>
-                                            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-black">Find Websites Automatically</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setIsSearchMode(!isSearchMode)}
-                                        className={`w-12 h-6 rounded-full relative transition-colors ${isSearchMode ? 'bg-pink-600' : 'bg-gray-800'}`}
-                                    >
-                                        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all shadow-md ${isSearchMode ? 'left-7' : 'left-1'}`} />
-                                    </button>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
-                                        <div>
-                                            <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2">Target Stage</label>
-                                            <select
-                                                value={importFilters.defaultStage}
-                                                onChange={(e) => setImportFilters({ ...importFilters, defaultStage: e.target.value })}
-                                                className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-white text-xs focus:border-pink-500 outline-none transition-all"
-                                            >
-                                                <option value="discovery">Discovery</option>
-                                                <option value="qualified">Qualified</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2">Custom Tags</label>
-                                            <input
-                                                type="text"
-                                                value={importFilters.customTags}
-                                                onChange={(e) => setImportFilters({ ...importFilters, customTags: e.target.value })}
-                                                placeholder="Sponsors, VIP"
-                                                className="w-full bg-black/40 border border-white/10 rounded-xl p-2.5 text-white text-xs focus:border-pink-500 outline-none transition-all placeholder:text-gray-700 font-bold"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
-                                        <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer group">
-                                            <input
-                                                type="checkbox"
-                                                checked={importFilters.autoTagState}
-                                                onChange={(e) => setImportFilters({ ...importFilters, autoTagState: e.target.checked })}
-                                                className="w-5 h-5 rounded-lg border-white/20 accent-pink-500 bg-black/50 cursor-pointer shadow-inner"
-                                            />
-                                            <span className="font-bold group-hover:text-pink-400 transition-colors uppercase text-[10px] tracking-widest">Auto-tag by State</span>
-                                        </label>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2">
-                                            {isSearchMode ? "Names (One per line)" : "URLs (One per line)"}
-                                        </label>
-                                        <textarea
-                                            value={scrapeUrls}
-                                            onChange={(e) => setScrapeUrls(e.target.value)}
-                                            placeholder={isSearchMode
-                                                ? "Nameless High\nArmour Academy\nJones University"
-                                                : "https://example-highschool.edu\nhttps://another-school.org"}
-                                            className="w-full h-48 bg-black/50 border border-white/10 rounded-2xl p-4 text-white focus:border-pink-500 outline-none transition-all font-mono text-xs resize-none shadow-inner"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="p-6 border-t border-white/10 bg-[#1a1a1a] flex justify-end gap-3">
-                                <button onClick={() => setIsScraperOpen(false)} className="px-6 py-2 text-xs font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors">Cancel</button>
-                                <button
-                                    onClick={handleScrape}
-                                    disabled={isScraping || !scrapeUrls.trim()}
-                                    className={`px-8 py-3 text-xs font-black uppercase tracking-widest rounded-xl flex items-center gap-2 transition-all shadow-lg ${isScraping ? 'bg-pink-500/50 cursor-wait' : 'bg-pink-600 hover:bg-pink-500 text-white shadow-pink-500/20 active:scale-95'}`}
-                                >
-                                    {isScraping ? (
-                                        <>
-                                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                                            Scraping...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <FaRobot /> Run Scraper
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
+                        if (newPending.length > 0) {
+                            setPendingLeads(prev => [...prev, ...newPending]);
+                            setIsReviewQueueOpen(true);
+                        }
+                    }}
+                />
             </AnimatePresence>
 
             {/* --- Paste Import Modal --- */}
@@ -1838,6 +2035,110 @@ export default function AdvancedCRM() {
                 )}
             </AnimatePresence>
 
-        </main >
+            {/* Confirm Empty Trash Modal */}
+            <AnimatePresence>
+                {isConfirmEmptyTrashOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        onClick={(e) => { if (e.target === e.currentTarget) setIsConfirmEmptyTrashOpen(false); }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-[#151515] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-6 border-b border-white/10 bg-[#1a1a1a]">
+                                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <FaTrash className="text-red-500" />
+                                    Empty Trash
+                                </h2>
+                            </div>
+                            <div className="p-6">
+                                <p className="text-gray-300 text-sm leading-relaxed">
+                                    Are you sure you want to permanently delete all items in trash? <span className="font-bold text-white">{deletedDeals.length} item{deletedDeals.length !== 1 ? 's' : ''}</span> will be removed forever. This cannot be undone.
+                                </p>
+                            </div>
+                            <div className="p-6 border-t border-white/10 bg-[#1a1a1a] flex justify-end gap-3">
+                                <button
+                                    onClick={() => setIsConfirmEmptyTrashOpen(false)}
+                                    className="px-6 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setDeletedDeals([]);
+                                        localStorage.removeItem(STORAGE_KEY_DELETED);
+                                        setIsTrashOpen(false);
+                                        setIsConfirmEmptyTrashOpen(false);
+                                    }}
+                                    className="px-8 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-xl shadow-red-500/20 active:scale-95"
+                                >
+                                    Empty Trash
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Toast Notification */}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className={`fixed bottom-6 right-6 px-6 py-3 rounded-lg font-semibold text-white text-sm shadow-lg ${toast.type === 'success'
+                            ? 'bg-green-500/90 backdrop-blur-sm'
+                            : 'bg-red-500/90 backdrop-blur-sm'
+                            }`}
+                    >
+                        {toast.message}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Scraper Taskbar - shows background job progress */}
+            <ScraperTaskbar
+                job={backgroundScraperJob}
+                onCancel={() => setBackgroundScraperJob(null)}
+                onExpand={() => setIsScraperOpen(true)}
+                onImport={() => {
+                    if (backgroundScraperJob?.results) {
+                        const newPending: PendingLead[] = backgroundScraperJob.results
+                            .map((r: any) => ({
+                                id: Math.random().toString(36).substr(2, 9),
+                                title: r.title || "Scraped Lead",
+                                company: r.title || r.company || "Unknown Company",
+                                contact: r.contact || r.emails?.[0] || (r.phones?.[0] ? r.phones[0] : "No Contact Found"),
+                                value: r.value || 0,
+                                priority: r.priority || 'medium',
+                                probability: r.probability || 10,
+                                dueDate: "2026-06-01",
+                                stage: importFilters.defaultStage,
+                                tags: ['Scraped', ...(importFilters.customTags ? importFilters.customTags.split(',').map(t => t.trim()) : [])],
+                                locationState: r.state || '',
+                                notes: [],
+                                email: r.emails?.[0] || r.email || '',
+                                phone: r.phones?.[0] || r.phone || '',
+                                status: 'pending'
+                            }));
+
+                        if (newPending.length > 0) {
+                            setPendingLeads(prev => [...prev, ...newPending]);
+                            setIsReviewQueueOpen(true);
+                            setBackgroundScraperJob(null);
+                        }
+                    }
+                }}
+                onDiscard={() => setBackgroundScraperJob(null)}
+            />
+
+        </main>
     );
 }

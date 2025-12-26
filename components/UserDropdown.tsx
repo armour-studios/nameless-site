@@ -13,13 +13,15 @@ import {
     FaCommentAlt,
     FaUsers,
     FaMedal,
-    FaChevronDown
+    FaChevronDown,
+    FaTrash
 } from "react-icons/fa";
 import Image from "next/image";
 
 export default function UserDropdown() {
     const { data: session } = useSession();
     const [isOpen, setIsOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown when clicking outside
@@ -39,6 +41,25 @@ export default function UserDropdown() {
 
     const user = session.user;
     const canAccessAdmin = user.role === "admin" || user.role === "staff";
+
+    const handleDeleteAccount = async () => {
+        try {
+            const res = await fetch("/api/user/delete-account", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (res.ok) {
+                await signOut({ callbackUrl: "/" });
+            } else {
+                const errorData = await res.json();
+                alert(`Failed to delete account: ${errorData.error || "Unknown error"}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("An unexpected error occurred.");
+        }
+    };
 
     return (
         <div className="relative" ref={dropdownRef}>
@@ -154,8 +175,66 @@ export default function UserDropdown() {
                                 >
                                     <FaSignOutAlt /> Sign Out
                                 </button>
+                                <button
+                                    onClick={() => setIsDeleteModalOpen(true)}
+                                    className="w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors text-sm font-medium mt-1"
+                                >
+                                    <FaTrash /> Delete Account
+                                </button>
                             </div>
                         </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Delete Account Modal */}
+            <AnimatePresence>
+                {isDeleteModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+                        onClick={(e) => { if (e.target === e.currentTarget) setIsDeleteModalOpen(false); }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="bg-[#151515] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+                        >
+                            <div className="p-6 border-b border-white/10 bg-[#1a1a1a]">
+                                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <FaTrash className="text-red-500" />
+                                    Delete Account
+                                </h2>
+                            </div>
+                            <div className="p-6">
+                                <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                                    Are you sure you want to delete your account? This action is <span className="font-bold text-white">permanent and cannot be undone</span>. All your data, including profile information and tournament history, will be deleted.
+                                </p>
+                                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                                    <p className="text-red-400 text-xs font-semibold">⚠️ WARNING: This is irreversible</p>
+                                </div>
+                            </div>
+                            <div className="p-6 border-t border-white/10 bg-[#1a1a1a] flex justify-end gap-3">
+                                <button 
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                    className="px-6 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsDeleteModalOpen(false);
+                                        handleDeleteAccount();
+                                    }}
+                                    className="px-8 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-xl shadow-red-500/20 active:scale-95"
+                                >
+                                    Delete Account
+                                </button>
+                            </div>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>

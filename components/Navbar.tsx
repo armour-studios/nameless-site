@@ -21,6 +21,7 @@ const MOCH_NEWS_ITEMS = [
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isLeaguesOpen, setIsLeaguesOpen] = useState(false);
+    const [isMoreOpen, setIsMoreOpen] = useState(false);
     const { data: session, status } = useSession();
     const [tickerItems, setTickerItems] = useState<string[]>(MOCH_NEWS_ITEMS);
 
@@ -91,10 +92,6 @@ export default function Navbar() {
                                 Home
                                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
                             </Link>
-                            <Link href="/our-vision" className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase">
-                                Our Vision
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
-                            </Link>
 
                             {/* Leagues Dropdown */}
                             <div
@@ -135,21 +132,66 @@ export default function Navbar() {
                                 </AnimatePresence>
                             </div>
 
-                            {[
-                                { name: 'Events', path: '/events' },
-                                { name: 'News', path: '/news' },
-                                { name: 'Store', path: '/store' },
-                                { name: 'Contact', path: '/contact' },
-                            ].map((link) => (
-                                <Link
-                                    key={link.name}
-                                    href={link.path}
-                                    className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase"
-                                >
-                                    {link.name}
-                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
-                                </Link>
-                            ))}
+                            <Link href="/events" className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase">
+                                Events
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
+                            </Link>
+
+                            <Link href="/our-vision" className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase">
+                                Our Vision
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
+                            </Link>
+
+                            {/* More Dropdown */}
+                            <div
+                                className="relative group"
+                                onMouseEnter={() => setIsMoreOpen(true)}
+                                onMouseLeave={() => setIsMoreOpen(false)}
+                            >
+                                <button className="text-gray-300 hover:text-white font-bold transition-colors relative flex items-center gap-1 uppercase">
+                                    More
+                                    <span className={`transition-transform duration-300 ${isMoreOpen ? 'rotate-180' : ''}`}>▾</span>
+                                </button>
+                                <AnimatePresence>
+                                    {isMoreOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute left-0 mt-2 w-48 bg-[#0a0014]/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50"
+                                        >
+                                            <div className="p-2 flex flex-col gap-1">
+                                                <Link
+                                                    href="/services"
+                                                    className="px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-sm font-bold text-gray-300 hover:text-cyan-500 uppercase"
+                                                    onClick={() => setIsMoreOpen(false)}
+                                                >
+                                                    Services
+                                                </Link>
+                                                <Link
+                                                    href="/news"
+                                                    className="px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-sm font-bold text-gray-300 hover:text-pink-500 uppercase"
+                                                    onClick={() => setIsMoreOpen(false)}
+                                                >
+                                                    News
+                                                </Link>
+                                                <Link
+                                                    href="/store"
+                                                    className="px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-sm font-bold text-gray-300 hover:text-purple-500 uppercase"
+                                                    onClick={() => setIsMoreOpen(false)}
+                                                >
+                                                    Store
+                                                </Link>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            <Link href="/contact" className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase">
+                                Contact
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
+                            </Link>
                         </div>
 
                         {/* Right Side Actions */}
@@ -202,10 +244,8 @@ export default function Navbar() {
                         <nav className="flex flex-col gap-6">
                             {[
                                 { name: 'HOME', path: '/' },
-                                { name: 'OUR VISION', path: '/our-vision' },
                                 { name: 'EVENTS', path: '/events' },
-                                { name: 'NEWS', path: '/news' },
-                                { name: 'STORE', path: '/store' },
+                                { name: 'OUR VISION', path: '/our-vision' },
                                 { name: 'CONTACT', path: '/contact' },
                             ].map((link) => (
                                 <Link
@@ -232,6 +272,28 @@ export default function Navbar() {
                                     className="text-xl font-bold text-purple-500"
                                 >
                                     INITIATIVE LEAGUE
+                                </Link>
+                                <div className="h-px bg-white/10 my-2"></div>
+                                <Link
+                                    href="/services"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-xl font-bold text-cyan-500"
+                                >
+                                    SERVICES
+                                </Link>
+                                <Link
+                                    href="/news"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-xl font-bold text-pink-500"
+                                >
+                                    NEWS
+                                </Link>
+                                <Link
+                                    href="/store"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-xl font-bold text-purple-500"
+                                >
+                                    STORE
                                 </Link>
                             </div>
                             {session ? (

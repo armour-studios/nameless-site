@@ -73,7 +73,7 @@ export function DiscoveryView({ deals, currentPage, itemsPerPage, onPageChange, 
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-[#1a1a1a] border-b border-white/5 text-gray-400 text-[10px] uppercase tracking-[0.2em] font-black sticky top-0 bg-[#151515]/95 backdrop-blur-md z-10">
-                            <th className="p-4">School Name</th>
+                            <th className="p-4">Company</th>
                             <th className="p-4">State</th>
                             <th className="p-4">Agent</th>
                             <th className="p-4">Contact</th>
@@ -92,12 +92,8 @@ export function DiscoveryView({ deals, currentPage, itemsPerPage, onPageChange, 
                             >
                                 <td className="p-4">
                                     <div className="flex items-center gap-3">
-                                        {deal.image ? (
+                                        {deal.image && (
                                             <img src={deal.image} alt="" className="w-8 h-8 rounded-lg object-cover border border-white/10" />
-                                        ) : (
-                                            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center">
-                                                <FaBuilding size={14} className="text-gray-600" />
-                                            </div>
                                         )}
                                         <div>
                                             <div className="font-bold text-white group-hover:text-pink-400 transition-colors uppercase tracking-tight">{deal.title}</div>
@@ -148,7 +144,7 @@ export function DiscoveryView({ deals, currentPage, itemsPerPage, onPageChange, 
                                 </td>
                                 <td className="p-4 text-center">
                                     <button
-                                        onClick={(e) => { e.stopPropagation(); if (confirm('Delete this deal?')) onDeleteClick(deal.id); }}
+                                        onClick={(e) => { e.stopPropagation(); onDeleteClick(deal.id); }}
                                         className="p-2 hover:bg-red-500/20 text-gray-500 hover:text-red-400 rounded-lg transition-all"
                                     >
                                         <FaTrash size={14} />
@@ -163,7 +159,7 @@ export function DiscoveryView({ deals, currentPage, itemsPerPage, onPageChange, 
             {/* Pagination */}
             <div className="flex items-center justify-between mt-4 text-sm">
                 <div className="text-gray-400">
-                    Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, discoveryDeals.length)} of {discoveryDeals.length} schools
+                    Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, discoveryDeals.length)} of {discoveryDeals.length} items
                 </div>
                 <div className="flex gap-2">
                     <button
