@@ -71,18 +71,18 @@ export default async function Home() {
           </Card>
         </Link>
 
-        <Link href="/initiative" className="block">
+        <Link href="/initiative/program-deck" className="block">
           <Card className="h-64 relative overflow-hidden group cursor-pointer border-2 border-white/5 hover:border-purple-500/50 transition-all">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/40 to-purple-600/40 z-10"></div>
             <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800')] bg-cover bg-center group-hover:scale-110 transition-transform duration-700"></div>
             <div className="relative z-20 h-full flex flex-col items-center justify-center text-center p-8">
-              <div className="bg-purple-500 text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full mb-4">Focus Point</div>
+              <div className="bg-purple-500 text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full mb-4">High School Esports</div>
               <h3 className="font-black text-3xl md:text-4xl mb-2 text-white font-[family-name:var(--font-heading)] drop-shadow-lg">
-                NAMELESS INITIATIVE LEAGUE
+                INITIATIVE LEAGUE
               </h3>
-              <p className="text-lg font-bold text-white/90 drop-shadow-md">High School League coming soon..</p>
+              <p className="text-lg font-bold text-white/90 drop-shadow-md">Bringing Competitive Gaming to Schools</p>
               <div className="mt-4 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                <span className="text-white font-black text-sm uppercase tracking-widest border-b-2 border-purple-500 pb-1">Learn More</span>
+                <span className="text-white font-black text-sm uppercase tracking-widest border-b-2 border-purple-500 pb-1">View Program Deck</span>
               </div>
             </div>
           </Card>

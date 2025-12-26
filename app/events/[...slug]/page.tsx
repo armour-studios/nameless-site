@@ -117,30 +117,30 @@ function EventCard({ event }: { event: Event }) {
 
             {/* Tabs */}
             {hasBracket && (
-                <div className="flex gap-2 p-4 border-b border-white/10 bg-white/5">
+                <div className="flex gap-2 p-3 sm:p-4 border-b border-white/10 bg-white/5 overflow-x-auto">
                     <button
                         onClick={() => setActiveTab('standings')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${activeTab === 'standings'
+                        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-semibold transition-all text-sm sm:text-base whitespace-nowrap ${activeTab === 'standings'
                             ? 'bg-pink-500 text-white'
                             : 'bg-white/10 text-gray-400 hover:bg-white/20'
                             }`}
                     >
-                        <FaTrophy /> Standings
+                        <FaTrophy className="text-sm sm:text-base" /> <span className="hidden sm:inline">Standings</span><span className="sm:hidden">Standings</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('bracket')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${activeTab === 'bracket'
+                        className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-semibold transition-all text-sm sm:text-base whitespace-nowrap ${activeTab === 'bracket'
                             ? 'bg-pink-500 text-white'
                             : 'bg-white/10 text-gray-400 hover:bg-white/20'
                             }`}
                     >
-                        <FaSitemap /> Bracket
+                        <FaSitemap className="text-sm sm:text-base" /> <span className="hidden sm:inline">Bracket</span><span className="sm:hidden">Bracket</span>
                     </button>
                 </div>
             )}
 
             {/* Content */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
                 {activeTab === 'standings' ? (
                     // Standings View
                     standings.length > 0 ? (
@@ -153,15 +153,15 @@ function EventCard({ event }: { event: Event }) {
                                 {displayedStandings.map((standing) => (
                                     <div
                                         key={standing.placement}
-                                        className={`flex items-center justify-between p-4 rounded-lg transition-all ${standing.placement === 1 ? 'bg-yellow-500/20 border-2 border-yellow-500 shadow-lg' :
+                                        className={`flex items-center justify-between p-3 sm:p-4 rounded-lg transition-all ${standing.placement === 1 ? 'bg-yellow-500/20 border-2 border-yellow-500 shadow-lg' :
                                             standing.placement === 2 ? 'bg-gray-400/20 border-2 border-gray-400' :
                                                 standing.placement === 3 ? 'bg-orange-500/20 border-2 border-orange-500' :
                                                     standing.placement <= 8 ? 'bg-white/5 border border-white/20' :
                                                         'bg-white/5 border border-white/10'
                                             }`}
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-lg ${standing.placement === 1 ? 'bg-yellow-500 text-black' :
+                                        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-black text-base sm:text-lg flex-shrink-0 ${standing.placement === 1 ? 'bg-yellow-500 text-black' :
                                                 standing.placement === 2 ? 'bg-gray-400 text-black' :
                                                     standing.placement === 3 ? 'bg-orange-500 text-black' :
                                                         standing.placement <= 8 ? 'bg-purple-600 text-white' :
@@ -169,10 +169,10 @@ function EventCard({ event }: { event: Event }) {
                                                 }`}>
                                                 {standing.placement}
                                             </div>
-                                            <div>
-                                                <span className="font-bold text-lg">{standing.entrant.name}</span>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="font-bold text-base sm:text-lg truncate">{standing.entrant.name}</div>
                                                 {standing.placement <= 3 && (
-                                                    <div className="text-xs text-gray-400">
+                                                    <div className="text-xs text-gray-400 hidden sm:block">
                                                         {standing.placement === 1 ? '🥇 Champion' :
                                                             standing.placement === 2 ? '🥈 Runner-up' :
                                                                 '🥉 Third Place'}
@@ -180,7 +180,7 @@ function EventCard({ event }: { event: Event }) {
                                                 )}
                                             </div>
                                         </div>
-                                        {standing.placement <= 3 && <FaTrophy className="text-yellow-500 text-2xl" />}
+                                        {standing.placement <= 3 && <FaTrophy className="text-yellow-500 text-xl sm:text-2xl flex-shrink-0" />}
                                     </div>
                                 ))}
                             </div>
@@ -327,7 +327,7 @@ export default function TournamentDetail() {
             </Link>
 
             {/* Hero Section */}
-            <div className="relative h-[400px] rounded-lg overflow-hidden mb-8">
+            <div className="relative h-[300px] sm:h-[400px] rounded-lg overflow-hidden mb-8">
                 {imageUrl ? (
                     <>
                         <img
@@ -341,39 +341,39 @@ export default function TournamentDetail() {
                     <div className="w-full h-full bg-gradient-to-br from-purple-900 via-pink-900 to-black"></div>
                 )}
 
-                <div className="absolute inset-0 flex flex-col justify-end p-8">
-                    <div className="flex items-center gap-3 mb-4">
-                        <span className={`px-4 py-2 rounded-lg text-sm font-bold uppercase ${status === 'completed' ? 'bg-gray-600 text-white' :
+                <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-8">
+                    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
+                        <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold uppercase ${status === 'completed' ? 'bg-gray-600 text-white' :
                             status === 'live' ? 'bg-red-600 text-white animate-pulse' :
                                 'bg-green-600 text-white'
                             }`}>
                             {status === 'completed' ? 'Completed' : status === 'live' ? 'Live' : 'Upcoming'}
                         </span>
-                        <span className="text-white/80 text-sm flex items-center gap-2">
+                        <span className="text-white/80 text-xs sm:text-sm flex items-center gap-1 sm:gap-2">
                             <FaUsers /> {totalEntrants} Teams
                         </span>
                     </div>
 
-                    <h1 className="text-4xl md:text-6xl font-black font-[family-name:var(--font-heading)] text-white mb-3 drop-shadow-lg">
+                    <h1 className="text-2xl sm:text-4xl md:text-6xl font-black font-[family-name:var(--font-heading)] text-white mb-2 sm:mb-3 drop-shadow-lg leading-tight">
                         {tournament.name}
                     </h1>
 
-                    <div className="flex flex-wrap items-center gap-6 text-white/90">
-                        <span className="flex items-center gap-2">
-                            <FaCalendar /> {formatShortDate(tournament.startAt)}
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-sm sm:text-base text-white/90">
+                        <span className="flex items-center gap-1.5 sm:gap-2">
+                            <FaCalendar className="text-xs sm:text-base" /> {formatShortDate(tournament.startAt)}
                         </span>
                         {tournament.endAt && tournament.endAt !== tournament.startAt && (
-                            <span className="flex items-center gap-2">
-                                <FaClock /> Ended {formatShortDate(tournament.endAt)}
+                            <span className="flex items-center gap-1.5 sm:gap-2">
+                                <FaClock className="text-xs sm:text-base" /> Ended {formatShortDate(tournament.endAt)}
                             </span>
                         )}
                         <a
                             href={`https://start.gg/${tournament.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-pink-400 hover:text-pink-300 transition-colors font-semibold"
+                            className="flex items-center gap-1.5 sm:gap-2 text-pink-400 hover:text-pink-300 transition-colors font-semibold"
                         >
-                            View on Start.gg <FaExternalLinkAlt />
+                            View on Start.gg <FaExternalLinkAlt className="text-xs sm:text-sm" />
                         </a>
                     </div>
                 </div>

@@ -64,9 +64,9 @@ export default function Initiative() {
                                 <Link href="/initiative/packages" className="btn-primary px-10 py-4 text-lg">
                                     Register Your School
                                 </Link>
-                                <button className="btn-outline px-10 py-4 text-lg">
+                                <Link href="/initiative/program-deck" className="btn-outline px-10 py-4 text-lg">
                                     Program Deck
-                                </button>
+                                </Link>
                             </div>
                         </div>
                         <div className="lg:col-span-5 relative h-80 lg:h-auto overflow-hidden">
@@ -84,43 +84,34 @@ export default function Initiative() {
                 </Card>
             </motion.div>
 
-            {/* Stats Grid */}
+            {/* Launching Soon Banner */}
             <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20"
+                className="mb-20"
             >
-                <motion.div variants={itemVariants}>
-                    <Card className="text-center py-10 bg-white/5 border-white/5 group hover:border-purple-500/30 transition-all">
-                        <div className="p-4 bg-purple-500/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-500/20 transition-all">
-                            <FaSchool className="text-4xl text-purple-400" />
+                <Card className="bg-gradient-to-r from-purple-900/40 via-pink-900/40 to-purple-900/40 border-2 border-purple-500/50">
+                    <div className="text-center py-12">
+                        <div className="inline-block bg-purple-500/20 border border-purple-500 rounded-full px-6 py-3 mb-6">
+                            <span className="text-purple-300 font-bold text-lg uppercase tracking-wider">🚀 Launching Fall 2025</span>
                         </div>
-                        <div className="text-5xl font-black text-white mb-2 font-[family-name:var(--font-heading)]">24+</div>
-                        <div className="text-gray-400 font-bold uppercase tracking-widest text-sm">Partner Schools</div>
-                    </Card>
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                    <Card className="text-center py-10 bg-white/5 border-white/5 group hover:border-pink-500/30 transition-all">
-                        <div className="p-4 bg-pink-500/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-pink-500/20 transition-all">
-                            <FaUsers className="text-4xl text-pink-400" />
+                        <h2 className="text-3xl md:text-5xl font-black mb-4 text-white font-[family-name:var(--font-heading)]">
+                            Building Tomorrow's <span className="text-gradient">Champions</span>
+                        </h2>
+                        <p className="text-gray-300 text-lg max-w-3xl mx-auto mb-8">
+                            The Initiative League is currently in development. Be among the first schools to join when registration opens in early 2025.
+                        </p>
+                        <div className="flex flex-wrap gap-4 justify-center">
+                            <Link href="/initiative/program-deck" className="btn-primary px-8 py-3">
+                                View Program Deck
+                            </Link>
+                            <Link href="/contact" className="btn-outline px-8 py-3">
+                                Express Interest
+                            </Link>
                         </div>
-                        <div className="text-5xl font-black text-white mb-2 font-[family-name:var(--font-heading)]">500+</div>
-                        <div className="text-gray-400 font-bold uppercase tracking-widest text-sm">Active Students</div>
-                    </Card>
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                    <Card className="text-center py-10 bg-white/5 border-white/5 group hover:border-cyan-500/30 transition-all">
-                        <div className="p-4 bg-cyan-500/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-cyan-500/20 transition-all">
-                            <FaChartLine className="text-4xl text-cyan-400" />
-                        </div>
-                        <div className="text-5xl font-black text-white mb-2 font-[family-name:var(--font-heading)]">12</div>
-                        <div className="text-gray-400 font-bold uppercase tracking-widest text-sm">Major Events</div>
-                    </Card>
-                </motion.div>
+                    </div>
+                </Card>
             </motion.div>
 
             {/* Programs */}

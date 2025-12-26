@@ -59,7 +59,7 @@ export default function Bracket({ sets, bracketType }: BracketProps) {
             <div className="mb-8">
                 <h3 className="text-lg md:text-xl font-bold mb-4 text-gray-300">{title}</h3>
                 <div className="grid gap-4" style={{
-                    gridTemplateColumns: `repeat(${rounds.length}, 1fr)`
+                    gridTemplateColumns: `repeat(${rounds.length}, minmax(200px, 1fr))`
                 }}>
                     {rounds.map((round, roundIndex) => {
                         const roundSets = setsByRound[round];
@@ -223,14 +223,23 @@ export default function Bracket({ sets, bracketType }: BracketProps) {
 
     return (
         <div className="bg-black/40 p-4 md:p-6 rounded-lg">
-            {isDoubleElim ? (
-                <>
-                    {renderBracket(upperBracket, 'Upper Bracket')}
-                    {renderBracket(lowerBracket, 'Lower Bracket')}
-                </>
-            ) : (
-                renderBracket(upperBracket, 'Tournament Bracket')
-            )}
+            {/* Mobile scroll hint */}
+            <div className="md:hidden text-xs text-gray-500 mb-3 flex items-center gap-2">
+                <span>👉</span>
+                <span>Scroll horizontally to view all rounds</span>
+            </div>
+
+            {/* Scrollable bracket container */}
+            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                {isDoubleElim ? (
+                    <>
+                        {renderBracket(upperBracket, 'Upper Bracket')}
+                        {renderBracket(lowerBracket, 'Lower Bracket')}
+                    </>
+                ) : (
+                    renderBracket(upperBracket, 'Tournament Bracket')
+                )}
+            </div>
         </div>
     );
 }

@@ -178,12 +178,11 @@ export default function Navbar() {
                                     </button>
                                 </div>
                             ) : (
-                                <button
-                                    onClick={() => signIn()}
-                                    className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 transition-all font-semibold"
-                                >
-                                    <FaUser size={14} /> Login
-                                </button>
+                                <Link href="/login">
+                                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 transition-all font-semibold">
+                                        <FaUser size={14} /> Login
+                                    </button>
+                                </Link>
                             )}
                         </div>
 
@@ -228,7 +227,7 @@ export default function Navbar() {
                             <div className="h-px bg-white/10 my-2"></div>
                             <div className="flex flex-col gap-4">
                                 <Link
-                                    href="/events#rocket-rush"
+                                    href="/rocket-rush"
                                     onClick={() => setIsOpen(false)}
                                     className="text-xl font-bold text-pink-500"
                                 >
