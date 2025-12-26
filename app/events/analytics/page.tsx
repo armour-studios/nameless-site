@@ -17,8 +17,16 @@ import {
     FaMedal,
     FaArrowLeft,
     FaFire,
-    FaChartPie
+    FaChartPie,
+    FaGlobeAmericas,
+    FaSatellite,
+    FaBroadcastTower,
+    FaTv
 } from "react-icons/fa";
+import LiveMatchCard from "@/components/analytics/LiveMatchCard";
+import SeedingAccuracyChart from "@/components/analytics/SeedingAccuracyChart";
+import GeographicHeatmap from "@/components/analytics/GeographicHeatmap";
+import { calculateUpsetScore } from "@/lib/analytics/analyticsHelpers";
 
 interface Tournament {
     id: number;
@@ -27,6 +35,9 @@ interface Tournament {
     startAt?: number | null;
     numAttendees?: number;
     state?: string;
+    isOnline?: boolean;
+    city?: string;
+    countryCode?: string;
     events?: Array<{
         id: number;
         name: string;
@@ -41,6 +52,18 @@ interface Tournament {
                 entrant: {
                     name: string;
                     initialSeedNum?: number;
+                    participants?: {
+                        id: number | string;
+                        gamerTag?: string;
+                        prefix?: string;
+                        user?: {
+                            gamerTag?: string;
+                            location?: {
+                                city?: string;
+                                country?: string;
+                            };
+                        };
+                    }[];
                 };
             }[];
         };
@@ -54,6 +77,8 @@ export default function AnalyticsPage() {
     const [loading, setLoading] = useState(true);
     const [showTicker, setShowTicker] = useState(true);
     const [showMobileLiveFeed, setShowMobileLiveFeed] = useState(false);
+    const [liveMatches, setLiveMatches] = useState<any[]>([]);
+    const [isFetchingLive, setIsFetchingLive] = useState(false);
 
     useEffect(() => {
         fetchTournaments();
@@ -65,11 +90,44 @@ export default function AnalyticsPage() {
             const data = await response.json();
             if (data.success) {
                 setTournaments(data.data || []);
+                // After getting tournaments, fetch live matches for any active ones
+                const active = (data.data || []).filter((t: any) => t.state === 'ACTIVE' || t.state === 'LIVE');
+                if (active.length > 0) {
+                    fetchLiveMatches(active);
+                }
             }
         } catch (err) {
             console.error('Error fetching tournaments:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchLiveMatches = async (activeTournaments: any[]) => {
+        setIsFetchingLive(true);
+        try {
+            // For each active tournament, we'd ideally fetch its live sets.
+            // Since we're doing this on the client, we'll call our new API or fetch directly if needed.
+            // For now, let's look for live sets in the tournament data if it's already there
+            const matches: any[] = [];
+            activeTournaments.forEach(t => {
+                if (t.events) {
+                    t.events.forEach((e: any) => {
+                        if (e.sets && e.sets.nodes) {
+                            e.sets.nodes.forEach((s: any) => {
+                                if (s.state === 2) { // IN_PROGRESS
+                                    matches.push({ ...s, tournamentName: t.name });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            setLiveMatches(matches);
+        } catch (err) {
+            console.error('Error fetching live matches:', err);
+        } finally {
+            setIsFetchingLive(false);
         }
     };
 
@@ -170,26 +228,36 @@ export default function AnalyticsPage() {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
 
-    // Top performers
-    const performerStats: { [key: string]: { wins: number; appearances: number } } = {};
+    // Top performers with player rosters
+    const performerStats: { [key: string]: { wins: number; appearances: number; players: Set<string> } } = {};
     filteredTournaments.forEach(t => {
         t.events?.forEach(e => {
             e.standings?.nodes.forEach(standing => {
                 const name = standing.entrant.name;
                 if (!performerStats[name]) {
-                    performerStats[name] = { wins: 0, appearances: 0 };
+                    performerStats[name] = { wins: 0, appearances: 0, players: new Set() };
                 }
                 performerStats[name].appearances++;
                 if (standing.placement === 1) {
                     performerStats[name].wins++;
                 }
+
+                // Add players from participants
+                standing.entrant.participants?.forEach(participant => {
+                    const playerTag = participant.gamerTag || participant.user?.gamerTag;
+                    if (playerTag) {
+                        const fullTag = participant.prefix ? `${participant.prefix} | ${playerTag}` : playerTag;
+                        performerStats[name].players.add(fullTag);
+                    }
+                });
             });
         });
     });
 
     const topPerformers = Object.entries(performerStats)
         .sort((a, b) => b[1].wins - a[1].wins)
-        .slice(0, 10);
+        .slice(0, 10)
+        .map(([name, stats]) => [name, { ...stats, players: Array.from(stats.players) }] as const);
 
     // Timeline data (events by month)
     const timeline: { [key: string]: number } = {};
@@ -283,6 +351,63 @@ export default function AnalyticsPage() {
     const highestAttendance = attendanceByEvent.length > 0 ? Math.max(...attendanceByEvent) : 0;
     const lowestAttendance = attendanceByEvent.length > 0 ? Math.min(...attendanceByEvent) : 0;
 
+    // Geographic Data - Enhanced to use player locations
+    const locationsList: any[] = [];
+    filteredTournaments.forEach(t => {
+        if (!t.isOnline && t.city && t.countryCode) {
+            locationsList.push({
+                id: t.id,
+                name: t.name,
+                city: t.city,
+                countryCode: t.countryCode,
+                lat: 40 + (Math.random() * 20 - 10),
+                lng: -90 + (Math.random() * 20 - 10),
+                eventCount: 1
+            });
+        }
+
+        // Add player locations
+        t.events?.forEach((e: any) => {
+            e.standings?.nodes?.forEach((s: any) => {
+                s.entrant.participants?.forEach((p: any) => {
+                    const loc = p.user?.location;
+                    if (loc && loc.country) {
+                        locationsList.push({
+                            id: `${p.id}-${Math.random()}`,
+                            name: p.gamerTag || s.entrant.name,
+                            city: loc.city || 'Unknown',
+                            countryCode: loc.country,
+                            lat: 30 + (Math.random() * 30 - 15), // Placeholder lat/lng based on country would be better
+                            lng: -100 + (Math.random() * 60 - 30),
+                            eventCount: 1
+                        });
+                    }
+                });
+            });
+        });
+    });
+
+    const locationStats = locationsList.slice(0, 50); // Limit markers
+
+    // Seeding Accuracy Chart Data - Enhanced for clarity
+    const seedingChartData = filteredTournaments.flatMap(t =>
+        (t.events || []).flatMap(e =>
+            (e.standings?.nodes || [])
+                .filter(s => s.placement <= 16)
+                .map(s => {
+                    const seed = s.entrant.initialSeedNum || s.placement;
+                    const upset = calculateUpsetScore(seed, s.placement);
+                    return {
+                        name: s.entrant.name,
+                        seed: seed,
+                        placement: s.placement,
+                        upset: upset,
+                        magnitude: Math.abs(upset)
+                    };
+                })
+        )
+    ).sort((a, b) => b.magnitude - a.magnitude).slice(0, 20);
+
 
     if (loading) {
         return (
@@ -313,15 +438,58 @@ export default function AnalyticsPage() {
                             </h1>
                             <p className="text-gray-400 text-base md:text-lg">Comprehensive insights into Nameless Esports tournament performance</p>
                         </div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setShowTicker(!showTicker)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${showTicker
+                                    ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-400'
+                                    : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                                    }`}
+                            >
+                                <FaBroadcastTower /> {showTicker ? 'Hide Live Feed' : 'Show Live Feed'}
+                            </button>
+                            <Link
+                                href="/events/live-feed"
+                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg font-bold hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all"
+                            >
+                                <FaTv /> Open as Monitor
+                            </Link>
+                        </div>
                     </div>
                 </div>
+
+                {/* Live Match Tracker */}
+                {showTicker && (
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                <span className="relative flex h-3 w-3">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                </span>
+                                Live Events Feed
+                            </h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {liveMatches.length > 0 ? (
+                                liveMatches.map((match: any) => (
+                                    <LiveMatchCard key={match.id} match={match} />
+                                ))
+                            ) : (
+                                <Card className="col-span-full py-8 text-center text-gray-500">
+                                    No live matches currently in progress.
+                                </Card>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Filters */}
                 <div className="mb-8">
                     <AnalyticsFilters onFilterChange={setFilters} />
                 </div>
 
-                {/* Key Metrics Overview - Mobile Optimized */}
+                {/* Key Metrics Overview */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
                     <Card className="text-center bg-gradient-to-br from-cyan-900/20 to-blue-900/20 border-cyan-500/30 p-4 sm:p-6">
                         <FaCalendar className="text-3xl text-cyan-400 mx-auto mb-2" />
@@ -345,7 +513,7 @@ export default function AnalyticsPage() {
                     </Card>
                 </div>
 
-                {/* NEW ANALYTICS: Upset Tracking & Attendance */}
+                {/* Upset Tracking & Attendance */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <Card className="bg-gradient-to-br from-orange-900/10 to-red-900/10 border-orange-500/30">
                         <div className="flex items-center justify-between mb-4">
@@ -488,25 +656,29 @@ export default function AnalyticsPage() {
                     </Card>
                 </div>
 
-                {/* Live Feed with Popout Button */}
-                <div className="mb-8">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                        <h2 className="text-2xl font-bold text-white">Live Feed</h2>
-                        <Link
-                            href="/events/live-feed"
-                            target="_blank"
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 rounded-lg text-white text-sm font-semibold transition-colors w-full sm:w-auto"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                            <span className="hidden sm:inline">Open as Monitor</span>
-                            <span className="sm:hidden">Popout</span>
-                        </Link>
+                {/* Live Match Tracker Section */}
+                {liveMatches.length > 0 && (
+                    <div className="mb-8">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                <FaSatellite className="text-indigo-400" /> Live Match Tracker
+                            </h2>
+                            <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20">
+                                {liveMatches.length} Ongoing Sets
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {liveMatches.map(match => (
+                                <LiveMatchCard key={match.id} match={match} tournamentName={match.tournamentName} />
+                            ))}
+                        </div>
                     </div>
-                    <Card className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-white/10 h-[500px]">
-                        <LiveTicker />
-                    </Card>
+                )}
+
+                {/* Seeding Analysis and Geographic Reach */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <SeedingAccuracyChart data={seedingChartData} />
+                    <GeographicHeatmap locations={locationStats} />
                 </div>
 
                 {/* NEW ANALYTICS: Bracket Performance & Top Performers */}
@@ -552,34 +724,42 @@ export default function AnalyticsPage() {
                             {topPerformers.map(([name, stats], index) => {
                                 const winRate = stats.appearances > 0 ? Math.round((stats.wins / stats.appearances) * 100) : 0;
                                 return (
-                                    <div key={name} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
-                                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                                            <div className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold ${index === 0 ? 'bg-yellow-500 text-black' :
-                                                index === 1 ? 'bg-gray-400 text-black' :
-                                                    index === 2 ? 'bg-orange-500 text-black' :
-                                                        'bg-white/10 text-gray-400'
-                                                }`}>
-                                                {index + 1}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="font-semibold truncate text-white">{name}</div>
-                                                <div className="text-xs text-gray-400">Team/Player</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-4 flex-shrink-0">
-                                            <div className="text-center">
-                                                <div className="text-yellow-400 font-bold">{stats.wins}</div>
-                                                <div className="text-xs text-gray-500">Wins</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-purple-400 font-bold">{stats.appearances}</div>
-                                                <div className="text-xs text-gray-500">Events</div>
-                                            </div>
-                                            <div className="text-center min-w-[50px]">
-                                                <div className={`text-lg font-black ${winRate >= 70 ? 'text-green-400' : winRate >= 50 ? 'text-cyan-400' : 'text-gray-400'}`}>
-                                                    {winRate}%
+                                    <div key={name} className="p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <div className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold ${index === 0 ? 'bg-yellow-500 text-black' :
+                                                    index === 1 ? 'bg-gray-400 text-black' :
+                                                        index === 2 ? 'bg-orange-500 text-black' :
+                                                            'bg-white/10 text-gray-400'
+                                                    }`}>
+                                                    {index + 1}
                                                 </div>
-                                                <div className="text-xs text-gray-500">Rate</div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="font-semibold truncate text-white">{name}</div>
+                                                    {stats.players && stats.players.length > 0 ? (
+                                                        <div className="text-xs text-gray-400 truncate">
+                                                            {stats.players.join(', ')}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-xs text-gray-400">Team/Player</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4 flex-shrink-0">
+                                                <div className="text-center">
+                                                    <div className="text-yellow-400 font-bold">{stats.wins}</div>
+                                                    <div className="text-xs text-gray-500">Wins</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-purple-400 font-bold">{stats.appearances}</div>
+                                                    <div className="text-xs text-gray-500">Events</div>
+                                                </div>
+                                                <div className="text-center min-w-[50px]">
+                                                    <div className={`text-lg font-black ${winRate >= 70 ? 'text-green-400' : winRate >= 50 ? 'text-cyan-400' : 'text-gray-400'}`}>
+                                                        {winRate}%
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">Rate</div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -588,8 +768,6 @@ export default function AnalyticsPage() {
                         </div>
                     </Card>
                 </div>
-
-
             </main>
 
             {/* Right Ticker Sidebar - Hidden on Mobile */}

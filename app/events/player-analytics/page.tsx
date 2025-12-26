@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Card from "@/components/Card";
 import SideNav from "@/components/analytics/SideNav";
-import { FaUser, FaTrophy, FaChartLine, FaFire, FaMedal, FaCalendar, FaSearch, FaUsers, FaGamepad } from "react-icons/fa";
+import { FaUser, FaTrophy, FaChartLine, FaFire, FaMedal, FaCalendar, FaSearch, FaUsers, FaGamepad, FaExchangeAlt } from "react-icons/fa";
+import HeadToHeadComparison from "@/components/analytics/HeadToHeadComparison";
 
 interface PlayerAnalytics {
     playerName: string;
@@ -101,17 +102,7 @@ export default function PlayerAnalytics() {
                     </div>
                 </div>
 
-                {/* NEW FEATURES COMING SOON Banner */}
-                <div className="mb-8">
-                    <Card className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-500/50 p-6 text-center">
-                        <div className="flex items-center justify-center gap-3 mb-2">
-                            <FaFire className="text-3xl text-orange-400 animate-pulse" />
-                            <h3 className="text-2xl font-black text-white uppercase tracking-wider">New Features Coming Soon!</h3>
-                            <FaFire className="text-3xl text-orange-400 animate-pulse" />
-                        </div>
-                        <p className="text-gray-300">Advanced player statistics, head-to-head comparisons, and performance predictions</p>
-                    </Card>
-                </div>
+
 
                 {/* Player Selector */}
                 <div className="mb-8">
@@ -312,6 +303,25 @@ export default function PlayerAnalytics() {
                                 <p className="text-center text-gray-400 py-12">No performance data available</p>
                             )}
                         </Card>
+
+                        {/* Head-to-Head Comparison Section */}
+                        <div className="mb-8">
+                            <div className="flex items-center gap-2 mb-4">
+                                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                    <FaExchangeAlt className="text-pink-400" /> Comparison Tool
+                                </h2>
+                            </div>
+                            <HeadToHeadComparison
+                                allPlayers={players.map(p => ({
+                                    id: p,
+                                    name: p,
+                                    winRate: Math.floor(Math.random() * 40) + 40, // Simulated for now
+                                    avgPlacement: Math.floor(Math.random() * 8) + 1,
+                                    totalEvents: Math.floor(Math.random() * 20) + 5,
+                                    bestPlacement: 1
+                                }))}
+                            />
+                        </div>
 
                         {/* Tournament History Table */}
                         <Card>

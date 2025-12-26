@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { fetchAllNamelessTournaments, fetchRecentEvents } from '@/lib/startgg';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const recent = searchParams.get('recent');

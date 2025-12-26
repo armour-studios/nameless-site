@@ -288,6 +288,12 @@ export default function TournamentDetail() {
         return null;
     };
 
+    const getPrizePool = (name: string) => {
+        if (name.toLowerCase().includes('rocket rush')) return '$100';
+        const match = name.match(/([$€£]\d+(?:,\d+)?|\d+(?:,\d+)?[$€£])/i);
+        return match ? match[0] : 'TBA';
+    };
+
     if (loading) {
         return (
             <main className="min-h-screen pb-20 px-4 md:px-8 max-w-[1400px] mx-auto">
@@ -380,24 +386,18 @@ export default function TournamentDetail() {
             </div>
 
             {/* Tournament Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                 <Card className="text-center">
-                    <div className="text-3xl font-bold text-cyan-400">{tournament.events.length}</div>
-                    <div className="text-sm text-gray-400 mt-1">Events</div>
+                    <div className="text-3xl font-bold text-yellow-400">{getPrizePool(tournament.name)}</div>
+                    <div className="text-sm text-gray-400 mt-1">Prize Pool</div>
                 </Card>
                 <Card className="text-center">
                     <div className="text-3xl font-bold text-purple-400">{totalEntrants}</div>
                     <div className="text-sm text-gray-400 mt-1">Teams</div>
                 </Card>
                 <Card className="text-center">
-                    <div className="text-3xl font-bold text-pink-400">{totalEntrants}</div>
-                    <div className="text-sm text-gray-400 mt-1">Total Teams</div>
-                </Card>
-                <Card className="text-center">
-                    <div className="text-3xl font-bold text-green-400">
-                        {status === 'completed' ? '100%' : status === 'live' ? '50%' : '0%'}
-                    </div>
-                    <div className="text-sm text-gray-400 mt-1">Complete</div>
+                    <div className="text-3xl font-bold text-pink-400">{tournament.numAttendees}</div>
+                    <div className="text-sm text-gray-400 mt-1">Players</div>
                 </Card>
             </div>
 

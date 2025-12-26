@@ -9,6 +9,7 @@ import SideNav from "@/components/analytics/SideNav";
 import MobileAnalyticsNav from "@/components/analytics/MobileAnalyticsNav";
 import LiveFeedModal from "@/components/analytics/LiveFeedModal";
 import CustomSelect from "@/components/CustomSelect";
+import StreamQueuePanel from "@/components/analytics/StreamQueuePanel";
 import {
     FaTrophy,
     FaUsers,
@@ -17,7 +18,8 @@ import {
     FaChartPie,
     FaSyncAlt,
     FaClock,
-    FaMedal
+    FaMedal,
+    FaTv
 } from "react-icons/fa";
 
 interface Tournament {
@@ -65,6 +67,8 @@ export default function CasterDashboard() {
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
     const [showMobileLiveFeed, setShowMobileLiveFeed] = useState(false);
+    const [streamQueues, setStreamQueues] = useState<any[]>([]);
+    const [isFetchingQueues, setIsFetchingQueues] = useState(false);
 
     useEffect(() => {
         fetchTournaments();
@@ -78,11 +82,32 @@ export default function CasterDashboard() {
             if (data.success) {
                 setTournaments(data.data || []);
                 setLastUpdated(new Date());
+
+                // Fetch stream queues for active tournaments
+                const active = (data.data || []).filter((t: any) => t.state === 'ACTIVE' || t.state === 'LIVE');
+                if (active.length > 0) {
+                    fetchStreamQueues();
+                }
             }
         } catch (err) {
             console.error('Error fetching tournaments:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchStreamQueues = async () => {
+        setIsFetchingQueues(true);
+        try {
+            const response = await fetch('/api/analytics/stream-queue');
+            const data = await response.json();
+            if (data.success) {
+                setStreamQueues(data.data || []);
+            }
+        } catch (err) {
+            console.error('Error fetching stream queues:', err);
+        } finally {
+            setIsFetchingQueues(false);
         }
     };
 
@@ -256,6 +281,25 @@ export default function CasterDashboard() {
                 <div className="mb-8">
                     <AnalyticsFilters onFilterChange={setFilters} />
                 </div>
+
+                {/* Stream Queue Section */}
+                {streamQueues.length > 0 && (
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                            <FaTv className="text-indigo-400" /> Stream Queues
+                        </h2>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {streamQueues.map((queue, idx) => (
+                                <StreamQueuePanel
+                                    key={idx}
+                                    streamName={queue.streamName}
+                                    streamSource={queue.streamSource}
+                                    matches={queue.sets}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Overview Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">

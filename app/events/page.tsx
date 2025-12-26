@@ -1,7 +1,7 @@
 "use client";
 
 import Card from "@/components/Card";
-import { FaTrophy, FaCalendar, FaGamepad, FaMedal } from "react-icons/fa";
+import { FaTrophy, FaCalendar, FaGamepad, FaMedal, FaUsers } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,6 +21,11 @@ interface Tournament {
     numAttendees?: number;
     numEntrants?: number;
     state?: string;
+    countryCode?: string | null;
+    city?: string | null;
+    venueName?: string | null;
+    venueAddress?: string | null;
+    isOnline?: boolean | null;
     images?: Array<{
         url: string;
         type: string;
@@ -294,10 +299,23 @@ export default function Tournaments() {
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6">
                         {/* Stats Grid */}
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-8 md:gap-10">
-                            {/* Total Events */}
+                            {/* Past Events */}
                             <div className="text-center">
-                                <div className="text-3xl md:text-4xl font-black text-cyan-400">{tournaments.length}</div>
+                                <div className="text-3xl md:text-4xl font-black text-cyan-400">
+                                    {tournaments.filter(t => getStatus(t) === 'completed' || getStatus(t) === 'past').length}
+                                </div>
                                 <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Events Hosted</div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="hidden md:block h-12 w-px bg-white/20"></div>
+
+                            {/* Upcoming Events */}
+                            <div className="text-center">
+                                <div className="text-3xl md:text-4xl font-black text-green-400">
+                                    {tournaments.filter(t => getStatus(t) === 'upcoming').length}
+                                </div>
+                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Upcoming Events</div>
                             </div>
 
                             {/* Divider */}
@@ -306,34 +324,31 @@ export default function Tournaments() {
                             {/* Total Teams */}
                             <div className="text-center">
                                 <div className="text-3xl md:text-4xl font-black text-purple-400">
-                                    {tournaments.reduce((sum, t) => sum + (t.events?.reduce((s, e) => s + (e.numEntrants || 0), 0) || 0), 0)}
+                                    {tournaments.reduce((sum, t) => sum + getEntrantCount(t), 0)}
                                 </div>
-                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Teams Played</div>
+                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Teams</div>
                             </div>
 
                             {/* Divider */}
                             <div className="hidden md:block h-12 w-px bg-white/20"></div>
 
-                            {/* Total Attendees */}
+                            {/* Total Players */}
                             <div className="text-center">
                                 <div className="text-3xl md:text-4xl font-black text-pink-400">
                                     {tournaments.reduce((sum, t) => sum + (t.numAttendees || 0), 0)}
                                 </div>
-                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Total Attendees</div>
+                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Players</div>
                             </div>
 
                             {/* Divider */}
                             <div className="hidden md:block h-12 w-px bg-white/20"></div>
 
-                            {/* Total Matches */}
+                            {/* Total Prizes */}
                             <div className="text-center">
                                 <div className="text-3xl md:text-4xl font-black text-yellow-400">
-                                    {tournaments.reduce((sum, t) => {
-                                        const teams = t.events?.reduce((s, e) => s + (e.numEntrants || 0), 0) || 0;
-                                        return sum + Math.max(0, teams - 1);
-                                    }, 0)}
+                                    ${(tournaments.filter(t => isRocketRush(t) && (getStatus(t) === 'completed' || getStatus(t) === 'past')).length * 100).toLocaleString()}
                                 </div>
-                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Matches Played</div>
+                                <div className="text-xs text-gray-400 uppercase tracking-widest mt-1">Total Prizes</div>
                             </div>
                         </div>
 
@@ -503,11 +518,12 @@ export default function Tournaments() {
                                                         <span className="flex items-center gap-2">
                                                             <FaCalendar /> {formatDate(tournament.startAt)}
                                                         </span>
-                                                        {entrants > 0 && (
-                                                            <span className="flex items-center gap-2 text-cyan-400">
-                                                                <FaTrophy /> {entrants} Teams
-                                                            </span>
-                                                        )}
+                                                        <span className="flex items-center gap-2 text-cyan-400">
+                                                            <FaUsers /> {entrants} Teams
+                                                        </span>
+                                                        <span className="flex items-center gap-2 text-pink-400">
+                                                            <FaGamepad /> {tournament.numAttendees || 0} Players
+                                                        </span>
                                                     </div>
 
                                                     {/* Top 3 Winners for Past Events */}
