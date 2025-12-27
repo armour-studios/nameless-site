@@ -49,6 +49,7 @@ export interface Event {
   numEntrants: number;
   tournament?: {
     name: string;
+    slug: string;
   };
   videogame?: {
     id?: number;
@@ -379,6 +380,7 @@ export async function fetchRecentEvents(limit: number = 8): Promise<Event[]> {
         nodes {
           id
           name
+          slug
           startAt
           state
           events {
@@ -391,7 +393,7 @@ export async function fetchRecentEvents(limit: number = 8): Promise<Event[]> {
               displayName
             }
             standings(query: {
-              perPage: 1
+              perPage: 3
               page: 1
             }) {
               nodes {
@@ -441,7 +443,8 @@ export async function fetchRecentEvents(limit: number = 8): Promise<Event[]> {
               startAt: tournament.startAt || 0,
               state: tournament.state || 'UNKNOWN',
               tournament: {
-                name: tournament.name
+                name: tournament.name,
+                slug: tournament.slug
               }
             });
           }
@@ -658,5 +661,139 @@ export async function fetchStartggUserDetails(slug: string) {
   } catch (error) {
     console.error("Error fetching Start.gg user details:", error);
     return null;
+  }
+}
+/**
+ * Fetch a Team's recent tournament results by slug (e.g., "team/nameless-esports")
+ */
+/**
+ * Fetch a Team's recent tournament results by querying its members' history.
+ * Since Team.events is not directly available, we infer history from active members.
+ */
+export async function fetchTeamResults(slug: string): Promise<any[]> {
+  // 1. Get Team Members and their User IDs
+  // We query a bit deeper to get events for each user.
+  const query = `
+    query TeamMemberEvents($slug: String!) {
+      team(slug: $slug) {
+        id
+        name
+        members(status: ACTIVE) {
+          player {
+            id
+            user {
+              id
+              events(query: { perPage: 6, page: 1 }) {
+                nodes {
+                  id
+                  name
+                  numEntrants
+                  state
+                  videogame {
+                    id
+                  }
+                  tournament {
+                    name
+                    slug
+                    images {
+                      url
+                    }
+                  }
+                  standings(query: { perPage: 1, page: 1 }) {
+                    nodes {
+                      placement
+                      container {
+                        name
+                      }
+                      entrant {
+                        name
+                        team {
+                            name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const variables = { slug };
+
+  try {
+    const response = await fetch(STARTGG_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({ query, variables }),
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    if (data.errors) {
+      console.error("Start.gg API errors in fetchTeamResults:", JSON.stringify(data.errors, null, 2));
+      return [];
+    }
+
+    const team = data.data?.team;
+    if (!team || !team.members) return [];
+
+    const teamName = team.name.toLowerCase();
+
+    // Aggregator for events
+    const eventMap = new Map<string, any>();
+
+    team.members.forEach((member: any) => {
+      const userEvents = member.player?.user?.events?.nodes;
+      if (!userEvents) return;
+
+      userEvents.forEach((event: any) => {
+        // Filter for Rocket League (13)
+        if (event.videogame?.id !== 13) return;
+
+        // Deduplicate
+        if (eventMap.has(event.id)) return;
+
+        // Check reasonable match for team?
+        // If the entrant name contains the team name, or team.name matches
+        const entrant = event.standings?.nodes?.[0]?.entrant;
+        if (!entrant) return;
+
+        const entrantName = entrant.name?.toLowerCase() || "";
+        const linkedTeamName = entrant.team?.name?.toLowerCase() || "";
+
+        // Loose matching: if entrant name has team name OR linked team name has team name
+        // OR if entrant name matches the regex of "Player 1 / Player 2" style but that's hard.
+        // Let's stick to name matching for now.
+        if (entrantName.includes(teamName) || linkedTeamName.includes(teamName)) {
+          eventMap.set(event.id, {
+            eventId: event.id,
+            eventName: event.name,
+            tournamentName: event.tournament?.name,
+            tournamentImage: event.tournament?.images?.[0]?.url,
+            tournament: {
+              name: event.tournament?.name,
+              slug: event.tournament?.slug
+            },
+            placement: event.standings?.nodes?.[0]?.placement || "-",
+            totalEntrants: event.numEntrants,
+            state: event.state
+          });
+        }
+      });
+    });
+
+    return Array.from(eventMap.values()).sort((a, b) => b.eventId - a.eventId); // Rough sort by ID (newer = higher ID)
+
+  } catch (error) {
+    console.error("Error fetching team results:", error);
+    return [];
   }
 }

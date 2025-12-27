@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Card from "@/components/Card";
-import { FaRocket, FaTrophy, FaUsers, FaCalendar, FaGamepad, FaChartLine, FaCheckCircle, FaStar, FaFire } from "react-icons/fa";
+import { FaRocket, FaTrophy, FaUsers, FaCalendar, FaGamepad, FaChartLine, FaCheckCircle, FaStar, FaFire, FaShieldAlt } from "react-icons/fa";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import PageTitle from "@/components/PageTitle";
 
 interface StandingEntry {
     placement: number;
@@ -75,63 +76,78 @@ export default function RocketRush() {
     };
 
     return (
-        <main className="min-h-screen pb-10 sm:pb-20 px-3 sm:px-4 md:px-8 max-w-[1400px] mx-auto">
+        <main className="min-h-screen pb-10 sm:pb-20 px-4 md:px-8 max-w-[1600px] mx-auto space-y-24">
             {/* Header */}
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-3 sm:gap-4 mb-8 sm:mb-12 pt-6 sm:pt-8"
-            >
-                <h1 className="text-3xl sm:text-4xl md:text-7xl font-[family-name:var(--font-heading)] font-black text-white uppercase tracking-tighter">
-                    ROCKET <span className="text-gradient">RUSH</span>
-                </h1>
-                <div className="h-[2px] flex-1 bg-gradient-to-r from-purple-500 to-transparent"></div>
-            </motion.div>
+            <PageTitle
+                title="ROCKET"
+                highlight="RUSH"
+                description="The premier weekly Rocket League experience with prize pools and season-long standings."
+            />
 
             {/* Hero Section */}
             <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="mb-16"
+                className="relative min-h-[500px] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl group"
             >
-                <Card className="relative overflow-hidden p-0 border-white/10 bg-[#0a1128]">
-                    <div className="grid grid-cols-1 lg:grid-cols-12">
-                        <div className="lg:col-span-7 p-6 sm:p-8 md:p-12 z-10 flex flex-col justify-center">
-                            <div className="inline-block bg-purple-500/10 text-purple-400 text-xs font-black uppercase tracking-[0.25em] sm:tracking-[0.3em] px-3 sm:px-4 py-2 rounded-lg mb-4 sm:mb-6 border border-purple-500/20 w-fit">
-                                Season 1 • Jan - May
-                            </div>
-                            <h2 className="text-3xl sm:text-4xl md:text-6xl font-black mb-4 sm:mb-6 text-white font-[family-name:var(--font-heading)] leading-none">
-                                WEEKLY <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">ROCKET LEAGUE</span>
-                            </h2>
-                            <p className="text-base sm:text-xl text-gray-300 mb-3 sm:mb-4 leading-relaxed max-w-2xl font-medium">
-                                Rocket Rush Season 1 is a <strong className="text-white">free-entry</strong>, weekly opt-in Rocket League league. Teams may come and go each week with <strong className="text-white">no long-term commitment</strong>.
-                            </p>
-                            <p className="text-base sm:text-lg text-cyan-400 mb-6 sm:mb-8 font-bold">
-                                $100 Prize Pool Every Week
-                            </p>
-                            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
-                                <Link href="/events?league=rocket-rush" className="btn-primary px-8 sm:px-10 py-3 sm:py-4 text-base sm:text-lg text-center">
-                                    View Events
-                                </Link>
-                                <a href="#rules" className="btn-outline px-8 sm:px-10 py-3 sm:py-4 text-base sm:text-lg text-center">
-                                    League Rules
-                                </a>
-                            </div>
-                        </div>
-                        <div className="lg:col-span-5 relative h-80 lg:h-auto overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#0a1128] via-transparent to-transparent z-10 hidden lg:block"></div>
-                            <img
-                                src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1000"
-                                alt="Rocket League"
-                                className="w-full h-full object-cover grayscale opacity-40"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <FaRocket className="text-[12rem] text-purple-500/20" />
-                            </div>
-                        </div>
+                {/* BG Image with Overlay */}
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070"
+                        alt="Rocket League Hero"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 grayscale opacity-40"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                </div>
+
+                {/* Content Overlay */}
+                <div className="relative z-10 h-full flex items-center p-8 md:p-20">
+                    <div className="max-w-4xl">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-[0.3em] text-white/90 mb-8"
+                        >
+                            Season 1 • Jan - May
+                        </motion.div>
+
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                            className="text-5xl md:text-8xl font-black mb-8 text-white font-[family-name:var(--font-heading)] leading-[0.85]"
+                        >
+                            WEEKLY <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">RL SERIES</span>
+                        </motion.h2>
+
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.6 }}
+                            className="text-xl md:text-2xl text-white/60 mb-12 max-w-2xl leading-relaxed"
+                        >
+                            Rocket Rush is a <strong className="text-white">free-entry</strong> weekly opt-in league.
+                            Build your legacy with <strong className="text-pink-500 font-black">$100 prize pools every week</strong> and no long-term commitment.
+                        </motion.p>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.7 }}
+                            className="flex flex-wrap gap-6"
+                        >
+                            <Link href="/esports/events?league=rocket-rush" className="px-12 py-5 bg-white text-black hover:bg-pink-500 hover:text-white rounded-2xl font-black uppercase tracking-widest transition-all hover:scale-105 shadow-2xl">
+                                View Events
+                            </Link>
+                            <a href="#rules" className="px-12 py-5 bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 rounded-2xl font-black uppercase tracking-widest transition-all hover:scale-105 backdrop-blur-md">
+                                League Rules
+                            </a>
+                        </motion.div>
                     </div>
-                </Card>
+                </div>
             </motion.div>
 
             {/* Stats Grid */}
@@ -140,260 +156,234 @@ export default function RocketRush() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-20"
+                className="grid grid-cols-1 md:grid-cols-4 gap-6"
             >
-                <motion.div variants={itemVariants}>
-                    <Card className="text-center py-10 bg-white/5 border-white/5 group hover:border-purple-500/30 transition-all">
-                        <div className="p-4 bg-purple-500/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-500/20 transition-all">
-                            <FaTrophy className="text-4xl text-yellow-400" />
+                {[
+                    { icon: FaTrophy, label: "Weekly Pool", value: "$100", color: "text-yellow-500" },
+                    { icon: FaCalendar, label: "Total Events", value: "10", color: "text-cyan-500" },
+                    { icon: FaCheckCircle, label: "Entry Fee", value: "FREE", color: "text-green-500" },
+                    { icon: FaFire, label: "Point Range", value: "TOP 16", color: "text-pink-500" }
+                ].map((stat, i) => (
+                    <motion.div key={i} variants={itemVariants}>
+                        <div className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-10 flex flex-col items-center text-center group hover:border-white/20 transition-all">
+                            <div className={`p-5 rounded-full bg-white/[0.05] mb-6 group-hover:scale-110 transition-transform ${stat.color}`}>
+                                <stat.icon className="text-4xl" />
+                            </div>
+                            <div className="text-4xl font-black text-white mb-2 tracking-tighter">{stat.value}</div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">{stat.label}</div>
                         </div>
-                        <div className="text-5xl font-black text-white mb-2 font-[family-name:var(--font-heading)]">$100</div>
-                        <div className="text-gray-400 font-medium">Weekly Prize Pool</div>
-                    </Card>
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                    <Card className="text-center py-10 bg-white/5 border-white/5 group hover:border-purple-500/30 transition-all">
-                        <div className="p-4 bg-cyan-500/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-cyan-500/20 transition-all">
-                            <FaCalendar className="text-4xl text-cyan-400" />
-                        </div>
-                        <div className="text-5xl font-black text-white mb-2 font-[family-name:var(--font-heading)]">10</div>
-                        <div className="text-gray-400 font-medium">Weekly Events</div>
-                    </Card>
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                    <Card className="text-center py-10 bg-white/5 border-white/5 group hover:border-purple-500/30 transition-all">
-                        <div className="p-4 bg-green-500/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-green-500/20 transition-all">
-                            <FaCheckCircle className="text-4xl text-green-400" />
-                        </div>
-                        <div className="text-5xl font-black text-white mb-2 font-[family-name:var(--font-heading)]">FREE</div>
-                        <div className="text-gray-400 font-medium">Entry Fee</div>
-                    </Card>
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                    <Card className="text-center py-10 bg-white/5 border-white/5 group hover:border-pink-500/30 transition-all">
-                        <div className="p-4 bg-pink-500/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 group-hover:bg-pink-500/20 transition-all">
-                            <FaFire className="text-4xl text-pink-400" />
-                        </div>
-                        <div className="text-5xl font-black text-white mb-2 font-[family-name:var(--font-heading)]">TOP 16</div>
-                        <div className="text-gray-400 font-medium">Earn Points</div>
-                    </Card>
-                </motion.div>
+                    </motion.div>
+                ))}
             </motion.div>
 
             {/* Format Section */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="mb-20"
-            >
-                <h2 className="text-4xl font-black mb-8 text-white font-[family-name:var(--font-heading)]">
-                    <FaGamepad className="inline mr-4 text-purple-400" />
-                    Format
-                </h2>
+            <section className="space-y-12">
+                <div className="flex items-center gap-6">
+                    <div className="w-12 h-12 rounded-2xl bg-pink-500/10 flex items-center justify-center border border-pink-500/20">
+                        <FaGamepad className="text-2xl text-pink-500" />
+                    </div>
+                    <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">LEAGUE <span className="text-pink-500">FORMAT</span></h2>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card className="bg-gradient-to-br from-purple-900/10 to-pink-900/10 border-purple-500/20">
-                        <h3 className="text-2xl font-bold mb-6 text-purple-400">Weekly Structure</h3>
-                        <ul className="space-y-4">
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span className="text-gray-300"><strong className="text-white">Free entry</strong>, open league</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span className="text-gray-300"><strong className="text-white">Weekly opt-in</strong> tournaments</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span className="text-gray-300"><strong className="text-white">$100 prize pool</strong> every week</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span className="text-gray-300">Points awarded to <strong className="text-white">Top 16 teams</strong></span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span className="text-gray-300"><strong className="text-white">Sliding point scale</strong> (later weeks weighted heavier)</span>
-                            </li>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-10 md:p-12 space-y-8">
+                        <h3 className="text-2xl font-black text-white uppercase tracking-wider flex items-center gap-3">
+                            <span className="w-2 h-2 rounded-full bg-pink-500" /> Weekly Structure
+                        </h3>
+                        <ul className="space-y-6">
+                            {[
+                                "Free entry, open league format",
+                                "Weekly opt-in tournaments",
+                                "$100 prize pool every week",
+                                "Points awarded to Top 16 teams",
+                                "Sliding point scale for late-season stakes"
+                            ].map((item, i) => (
+                                <li key={i} className="flex items-start gap-4 group">
+                                    <div className="mt-1.5 w-5 h-5 rounded-full border border-pink-500/30 flex items-center justify-center group-hover:bg-pink-500/20 transition-all">
+                                        <FaCheckCircle className="text-[10px] text-pink-500 opacity-0 group-hover:opacity-100 transition-all" />
+                                    </div>
+                                    <span className="text-lg text-white/70 group-hover:text-white transition-colors">{item}</span>
+                                </li>
+                            ))}
                         </ul>
-                    </Card>
+                    </div>
 
-                    <Card className="bg-gradient-to-br from-cyan-900/10 to-blue-900/10 border-cyan-500/20">
-                        <h3 className="text-2xl font-bold mb-6 text-cyan-400">End of Season Invitational</h3>
-                        <div className="space-y-6">
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">1</div>
-                                    <h4 className="font-bold text-white text-lg">Day 1 – Wildcard Qualifier</h4>
+                    <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-10 md:p-12 space-y-8">
+                        <h3 className="text-2xl font-black text-white uppercase tracking-wider flex items-center gap-3">
+                            <span className="w-2 h-2 rounded-full bg-cyan-500" /> Season Invitational
+                        </h3>
+                        <div className="space-y-8">
+                            <div className="flex gap-6">
+                                <div className="text-4xl font-black text-cyan-500/20">01</div>
+                                <div>
+                                    <h4 className="font-black text-white uppercase tracking-widest text-sm mb-2">Wildcard Qualifier</h4>
+                                    <p className="text-white/50 text-base">Open double elimination bracket where the Top 2 teams advance to the main stage.</p>
                                 </div>
-                                <ul className="space-y-2 ml-10">
-                                    <li className="text-gray-300">• Open double elimination bracket</li>
-                                    <li className="text-gray-300">• Top 2 teams advance to Day 2</li>
-                                </ul>
                             </div>
-
-                            <div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-sm">2</div>
-                                    <h4 className="font-bold text-white text-lg">Day 2 – Invitational Finals</h4>
+                            <div className="flex gap-6">
+                                <div className="text-4xl font-black text-cyan-500/20">02</div>
+                                <div>
+                                    <h4 className="font-black text-white uppercase tracking-widest text-sm mb-2">Invitational Finals</h4>
+                                    <p className="text-white/50 text-base">The Top 6 teams from standings join the Wildcards to compete for the Season 1 Crown.</p>
                                 </div>
-                                <ul className="space-y-2 ml-10">
-                                    <li className="text-gray-300">• 6 top teams from season standings</li>
-                                    <li className="text-gray-300">• 2 wildcard teams from Day 1</li>
-                                    <li className="text-yellow-400 font-bold">• Invitational-only finals to crown the Season 1 champion</li>
-                                </ul>
                             </div>
-
-                            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                                <p className="text-yellow-400 font-bold text-center">
-                                    🏆 Special Prize Pool 🏆
-                                </p>
+                            <div className="pt-6 border-t border-white/5">
+                                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6 text-center">
+                                    <p className="text-yellow-500 font-black uppercase tracking-[0.2em] text-xs">Invitational Exclusive Prize Pool</p>
+                                </div>
                             </div>
                         </div>
-                    </Card>
+                    </div>
                 </div>
-            </motion.div>
+            </section>
 
             {/* Points Breakdown Table */}
-            <motion.div
+            <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="mb-20"
             >
-                <h2 className="text-4xl font-black mb-8 text-white font-[family-name:var(--font-heading)]">
-                    <FaChartLine className="inline mr-4 text-cyan-400" />
-                    Points Breakdown
-                </h2>
+                <div className="flex items-center gap-6 mb-12">
+                    <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                        <FaChartLine className="text-2xl text-cyan-500" />
+                    </div>
+                    <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">POINTS <span className="text-cyan-500">BREAKDOWN</span></h2>
+                </div>
 
-                <Card className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-white/10">
-                    <p className="text-gray-400 mb-4 sm:mb-6 text-center text-xs sm:text-sm">
-                        $100 WEEKLY FREE OPT-IN TOURNAMENTS | POINTS BREAKDOWN
-                    </p>
+                <div className="bg-white/[0.02] border border-white/10 rounded-[2.5rem] p-8 md:p-12 overflow-hidden relative">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                        <FaChartLine className="text-9xl text-white" />
+                    </div>
 
-                    <div className="overflow-x-auto -mx-4 sm:mx-0">
-                        <div className="min-w-[800px] px-4 sm:px-0">
-                            <table className="w-full text-center">
-                                <thead>
-                                    <tr className="border-b border-white/20">
-                                        <th className="py-3 px-4 font-bold text-white"></th>
-                                        {pointsBreakdown.map((week, i) => (
-                                            <th key={i} className="py-3 px-2 sm:px-4 font-bold text-sm sm:text-base">
-                                                <div className="text-white whitespace-pre-line">{week.week}</div>
-                                            </th>
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[1000px]">
+                            <thead>
+                                <tr className="border-b border-white/10">
+                                    <th className="py-6 px-4 text-left font-black text-white/40 uppercase tracking-[0.2em] text-[10px]">Placement</th>
+                                    {pointsBreakdown.map((week, i) => (
+                                        <th key={i} className="py-6 px-4 text-center">
+                                            <div className="text-white font-black uppercase tracking-tighter text-sm whitespace-pre-line">{week.week}</div>
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {["1ST", "2ND", "3RD", "4TH", "5TH-8TH", "9TH-12TH", "13TH-16TH"].map((placement, rowIdx) => (
+                                    <tr key={placement} className="border-b border-white/5 hover:bg-white/[0.03] transition-colors group">
+                                        <td className="py-6 px-4">
+                                            <span className="text-white font-black tracking-tight group-hover:text-cyan-500 transition-colors">{placement}</span>
+                                        </td>
+                                        {pointsBreakdown.map((week, colIdx) => (
+                                            <td key={colIdx} className="py-6 px-4 text-center">
+                                                <span className="text-cyan-500 font-black font-mono text-lg">
+                                                    {week.placements[rowIdx]}
+                                                </span>
+                                            </td>
                                         ))}
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {["1ST", "2ND", "3RD", "4TH", "5TH-8TH", "9TH-12TH", "13TH-16TH"].map((placement, rowIdx) => (
-                                        <tr key={placement} className="border-b border-white/10 hover:bg-white/5 transition-colors">
-                                            <td className="py-3 px-4 font-bold text-white text-sm sm:text-base">{placement}</td>
-                                            {pointsBreakdown.map((week, colIdx) => (
-                                                <td key={colIdx} className="py-3 px-2 sm:px-4 font-mono text-cyan-400 font-bold text-sm sm:text-base">
-                                                    {week.placements[rowIdx]}
-                                                </td>
-                                            ))}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <div className="mt-8 text-center">
-                            <p className="text-purple-400 font-bold text-lg mb-2">
-                                🎯 INVITATIONAL APRIL 25 OR MAY 2ND 🎯
-                            </p>
-                            <p className="text-white font-semibold">
-                                TOP 6 TEAMS INVITED • 2 WILDCARDS
+                    <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-8 pt-10 border-t border-white/5">
+                        <div className="flex items-center gap-4">
+                            <div className="w-3 h-3 rounded-full bg-cyan-500 animate-pulse" />
+                            <p className="text-white/60 font-medium tracking-wide">Final Points weighted heavier in Week 10</p>
+                        </div>
+                        <div className="bg-white/5 backdrop-blur-md rounded-2xl px-8 py-4 border border-white/10">
+                            <p className="text-white font-black uppercase tracking-[0.1em] text-sm">
+                                🎯 Invitational Date: <span className="text-cyan-500">April 25</span>
                             </p>
                         </div>
                     </div>
-                </Card>
-            </motion.div>
+                </div>
+            </motion.section>
 
             {/* Off Weeks */}
-            <motion.div
+            <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="mb-20"
+                className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
             >
-                <Card className="bg-gradient-to-br from-red-900/10 to-orange-900/10 border-red-500/30">
-                    <h3 className="text-2xl font-bold mb-4 text-red-400 flex items-center gap-3">
-                        <FaCalendar />
-                        OFF WEEKS
-                    </h3>
-                    <div className="flex flex-wrap gap-4 mb-4">
-                        {offWeeks.map((week, i) => (
-                            <div key={i} className="px-4 py-2 bg-red-500/20 rounded-lg border border-red-500/30 text-red-300 font-bold">
-                                {week}
-                            </div>
-                        ))}
-                    </div>
-                    <p className="text-gray-400 text-sm">
-                        No tournaments scheduled on these dates. Use these weeks to rest, practice, or catch up!
-                    </p>
-                </Card>
-            </motion.div>
+                <div className="lg:col-span-4 space-y-4">
+                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter">OFF <span className="text-red-500">WEEKS</span></h2>
+                    <p className="text-white/50 text-lg">Scheduled breaks for teams to rest and prepare for the next leg of the season.</p>
+                </div>
+                <div className="lg:col-span-8 flex flex-wrap gap-4">
+                    {offWeeks.map((week, i) => (
+                        <div key={i} className="px-8 py-5 bg-red-500/5 border border-red-500/20 rounded-[1.5rem] text-red-500 font-black tracking-widest hover:bg-red-500 hover:text-white transition-all">
+                            {week}
+                        </div>
+                    ))}
+                </div>
+            </motion.section>
 
             {/* Standings Section */}
-            <motion.div
+            <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="mb-20"
+                id="standings"
             >
-                <h2 className="text-4xl font-black mb-8 text-white font-[family-name:var(--font-heading)]">
-                    <FaTrophy className="inline mr-4 text-yellow-400" />
-                    Season 1 Standings
-                </h2>
+                <div className="flex items-center gap-6 mb-12">
+                    <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
+                        <FaTrophy className="text-2xl text-yellow-500" />
+                    </div>
+                    <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">SEASON <span className="text-yellow-500">STANDINGS</span></h2>
+                </div>
 
-                <Card className="bg-gradient-to-br from-gray-900/50 to-gray-800/50 border-white/10">
-                    <div className="mb-6">
-                        <p className="text-gray-400 text-center mb-2">
-                            Live standings updated after each weekly event
-                        </p>
-                        <p className="text-yellow-400 text-sm text-center">
-                            {standings.length === 0 ? 'Points will be displayed as weekly events are completed' : `${standings.length} teams in standings`}
-                        </p>
+                <div className="bg-white/[0.02] border border-white/10 rounded-[2.5rem] p-8 md:p-12">
+                    <div className="flex items-center justify-between mb-12">
+                        <div className="space-y-1">
+                            <p className="text-white font-black uppercase tracking-widest text-xs">Live Update Status</p>
+                            <p className="text-white/40 text-sm">{standings.length === 0 ? 'Syncing with Start.gg...' : `${standings.length} Teams Registered`}</p>
+                        </div>
+                        <a
+                            href="https://www.start.gg/league/100-3v3-weekly-rocket-rush-season-1/standings"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-white/40 hover:text-white font-black uppercase tracking-widest text-xs flex items-center gap-2 transition-colors group"
+                        >
+                            Full Leaderboard <div className="w-6 h-[1px] bg-white/20 group-hover:w-10 transition-all" />
+                        </a>
                     </div>
 
                     {loadingStandings ? (
-                        <div className="py-20 text-center">
-                            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
-                            <p className="text-gray-400">Loading standings...</p>
+                        <div className="py-20 flex flex-col items-center gap-6">
+                            <div className="w-16 h-16 border-4 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin" />
+                            <p className="text-white/20 font-black uppercase tracking-widest text-xs">Fetching Data</p>
                         </div>
                     ) : standings.length > 0 ? (
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="border-b border-white/20">
-                                        <th className="py-4 px-4 text-left font-bold text-white">Rank</th>
-                                        <th className="py-4 px-4 text-left font-bold text-white">Team</th>
-                                        <th className="py-4 px-4 text-right font-bold text-white">Points</th>
+                                    <tr className="border-b border-white/5">
+                                        <th className="py-6 px-4 text-left font-black text-white/20 uppercase tracking-[0.2em] text-[10px]">Rank</th>
+                                        <th className="py-6 px-4 text-left font-black text-white/20 uppercase tracking-[0.2em] text-[10px]">Competitor</th>
+                                        <th className="py-6 px-4 text-right font-black text-white/20 uppercase tracking-[0.2em] text-[10px]">Season Pts</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {standings.map((entry) => (
-                                        <tr key={entry.entrant.id} className="border-b border-white/10 hover:bg-white/5 transition-colors">
-                                            <td className="py-4 px-4">
-                                                <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full font-bold ${entry.placement === 1 ? 'bg-yellow-500 text-black' :
-                                                    entry.placement === 2 ? 'bg-gray-400 text-black' :
-                                                        entry.placement === 3 ? 'bg-orange-500 text-black' :
-                                                            'bg-white/10 text-gray-400'
+                                        <tr key={entry.entrant.id} className="border-b border-white/5 hover:bg-white/[0.03] transition-colors group">
+                                            <td className="py-6 px-4">
+                                                <div className={`text-2xl font-black ${entry.placement === 1 ? 'text-yellow-500' :
+                                                    entry.placement === 2 ? 'text-white/80' :
+                                                        entry.placement === 3 ? 'text-orange-600' :
+                                                            'text-white/20'
                                                     }`}>
-                                                    {entry.placement}
+                                                    #{entry.placement}
                                                 </div>
                                             </td>
-                                            <td className="py-4 px-4">
-                                                <span className="text-white font-semibold">{entry.entrant.name}</span>
+                                            <td className="py-6 px-4 text-xl font-black text-white group-hover:translate-x-2 transition-transform">
+                                                {entry.entrant.name}
                                             </td>
-                                            <td className="py-4 px-4 text-right">
-                                                <span className="text-cyan-400 font-bold text-lg font-mono">{entry.totalPoints}</span>
+                                            <td className="py-6 px-4 text-right">
+                                                <span className="text-3xl font-black text-cyan-500 font-mono italic">
+                                                    {entry.totalPoints}
+                                                </span>
                                             </td>
                                         </tr>
                                     ))}
@@ -401,204 +391,120 @@ export default function RocketRush() {
                             </table>
                         </div>
                     ) : (
-                        <div className="py-20 text-center">
-                            <FaTrophy className="text-6xl text-gray-600 mx-auto mb-4" />
-                            <p className="text-gray-400 text-lg">No standings yet</p>
-                            <p className="text-gray-500 text-sm mt-2">Standings will appear after the first weekly event completes</p>
+                        <div className="py-32 text-center space-y-6">
+                            <FaTrophy className="text-6xl text-white/5 mx-auto" />
+                            <p className="text-white/30 font-black uppercase tracking-widest text-sm">No points recorded for Season 1</p>
                         </div>
                     )}
-
-                    <div className="mt-6 text-center">
-                        <a
-                            href="https://www.start.gg/league/100-3v3-weekly-rocket-rush-season-1/standings"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn-outline px-8 py-3 inline-block"
-                        >
-                            View Full Standings on Start.gg
-                        </a>
-                    </div>
-                </Card>
-            </motion.div>
+                </div>
+            </motion.section>
 
             {/* League Rules Section */}
-            <motion.div
-                id="rules"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="mb-20 scroll-mt-20"
-            >
-                <h2 className="text-4xl font-black mb-8 text-white font-[family-name:var(--font-heading)]">
-                    <FaCheckCircle className="inline mr-4 text-green-400" />
-                    League Rules
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card className="bg-gradient-to-br from-purple-900/10 to-pink-900/10 border-purple-500/20">
-                        <h3 className="text-2xl font-bold mb-6 text-purple-400">General Rules</h3>
-                        <ul className="space-y-3 text-gray-300">
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>Teams must register each week - no automatic carry-over</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>Free entry, no fee required</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>3v3 Rocket League format</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>All skill levels welcome</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>Teams can change rosters week-to-week</span>
-                            </li>
-                        </ul>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-cyan-900/10 to-blue-900/10 border-cyan-500/20">
-                        <h3 className="text-2xl font-bold mb-6 text-cyan-400">Points & Prizes</h3>
-                        <ul className="space-y-3 text-gray-300">
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>Top 16 teams earn points each week</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>$100 prize pool distributed weekly</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>Later weeks award more points (sliding scale)</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>Top 6 teams qualify for Invitational</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>Special prize pool for Invitational finals</span>
-                            </li>
-                        </ul>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-green-900/10 to-emerald-900/10 border-green-500/20">
-                        <h3 className="text-2xl font-bold mb-6 text-green-400">Game Settings</h3>
-                        <ul className="space-y-3 text-gray-300">
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span><strong className="text-white">Team Size:</strong> 3v3</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span><strong className="text-white">Default Arena:</strong> DFH Stadium</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span><strong className="text-white">Bot Difficulty:</strong> No Bots</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span><strong className="text-white">Region:</strong> US East (other regions allowed if both teams agree)</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span><strong className="text-white">Joinable By:</strong> Name/Password</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span><strong className="text-white">Mutators:</strong> None</span>
-                            </li>
-                        </ul>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-blue-900/10 to-indigo-900/10 border-blue-500/20">
-                        <h3 className="text-2xl font-bold mb-6 text-blue-400">Tournament Bracket</h3>
-                        <div className="space-y-4">
-                            <div>
-                                <h4 className="font-bold text-white mb-3 flex items-center gap-2">
-                                    <span className="text-yellow-400">🏆</span> Winners Bracket
-                                </h4>
-                                <ul className="space-y-2 ml-6 text-gray-300">
-                                    <li>• <strong className="text-white">Round 1 - Winners Finals:</strong> Best of 3</li>
-                                    <li>• <strong className="text-white">Grand Finals:</strong> Best of 5 with game advantage</li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-white mb-3 flex items-center gap-2">
-                                    <span className="text-red-400">⚔️</span> Losers Bracket
-                                </h4>
-                                <ul className="space-y-2 ml-6 text-gray-300">
-                                    <li>• <strong className="text-white">Round 1 - Quarter-Finals:</strong> 1 Game</li>
-                                    <li>• <strong className="text-white">Semi-Finals + Losers Finals:</strong> Best of 3</li>
-                                </ul>
-                            </div>
-                            <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 mt-4">
-                                <p className="text-purple-300 text-sm text-center font-semibold">
-                                    Double Elimination Format
-                                </p>
-                            </div>
-                        </div>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-yellow-900/10 to-orange-900/10 border-yellow-500/20">
-                        <h3 className="text-2xl font-bold mb-6 text-yellow-400">Important Notes</h3>
-                        <ul className="space-y-3 text-gray-300">
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>Check-in required 15 minutes before start</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>No-shows will be disqualified</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>Screenshots required for disputes</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <FaCheckCircle className="text-green-400 mt-1 flex-shrink-0" />
-                                <span>Full rulebook available on event pages</span>
-                            </li>
-                        </ul>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-red-900/10 to-pink-900/10 border-red-500/20">
-                        <h3 className="text-2xl font-bold mb-6 text-red-400">Code of Conduct</h3>
-                        <p className="text-gray-300 mb-4">
-                            All players must maintain sportsmanship and respect towards opponents, teammates, and staff. Toxic behavior, harassment, or cheating will result in immediate disqualification and potential ban from future events.
-                        </p>
-                        <p className="text-gray-400 text-sm">
-                            For detailed rules and regulations, please refer to the specific event page when registering each week.
-                        </p>
-                    </Card>
+            <section id="rules" className="scroll-mt-32">
+                <div className="flex items-center gap-6 mb-12">
+                    <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                        <FaCheckCircle className="text-2xl text-green-500" />
+                    </div>
+                    <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">LEAGUE <span className="text-green-500">RULES</span></h2>
                 </div>
-            </motion.div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[
+                        {
+                            title: "General", icon: FaUsers, color: "text-purple-500", items: [
+                                "Weekly registration required",
+                                "Free entry for all teams",
+                                "3v3 Standard format",
+                                "All skill levels welcome",
+                                "Open roster changes"
+                            ]
+                        },
+                        {
+                            title: "Prizes", icon: FaTrophy, color: "text-yellow-500", items: [
+                                "Top 16 earn weekly points",
+                                "$100 distributed weekly",
+                                "Late weeks weighted heavier",
+                                "Top 6 reach Invitational",
+                                "Special Finals prize pool"
+                            ]
+                        },
+                        {
+                            title: "Settings", icon: FaGamepad, color: "text-cyan-500", items: [
+                                "Arena: DFH Stadium",
+                                "Bot Difficulty: None",
+                                "Region: US East",
+                                "Join: Name/Password",
+                                "Mutators: Default"
+                            ]
+                        },
+                        {
+                            title: "Bracket", icon: FaChartLine, color: "text-pink-500", items: [
+                                "Double Elimination format",
+                                "Winners: Best of 3",
+                                "Grand Finals: Best of 5",
+                                "Losers R1: 1 Game",
+                                "Losers Finals: Best of 3"
+                            ]
+                        },
+                        {
+                            title: "Important", icon: FaCheckCircle, color: "text-green-500", items: [
+                                "Check-in 15m before start",
+                                "No-shows lead to DQ",
+                                "Screenshot results",
+                                "Follow full Start.gg rules",
+                                "Fair play is mandatory"
+                            ]
+                        },
+                        {
+                            title: "Conduct", icon: FaShieldAlt, color: "text-red-500", items: [
+                                "Show sportsmanship",
+                                "Toxic behavior results in ban",
+                                "Respect staff decisions",
+                                "Professional discord conduct",
+                                "Zero tolerance for toxicity"
+                            ]
+                        }
+                    ].map((group, i) => (
+                        <div key={i} className="bg-white/[0.03] border border-white/10 rounded-[2rem] p-8 space-y-6 hover:bg-white/[0.05] transition-all group">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xl font-black text-white uppercase tracking-wider">{group.title}</h3>
+                                <group.icon className={`text-2xl ${group.color} opacity-40 group-hover:opacity-100 transition-opacity`} />
+                            </div>
+                            <ul className="space-y-4">
+                                {group.items.map((item, j) => (
+                                    <li key={j} className="flex items-center gap-3 text-white/50 text-sm font-medium">
+                                        <div className="w-1 h-1 rounded-full bg-white/20" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+            </section>
 
             {/* CTA Section */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+            <motion.section
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
+                className="relative rounded-[3rem] overflow-hidden bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-transparent border border-white/10 p-12 md:p-20 text-center space-y-8"
             >
-                <Card className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 border-purple-500/30 text-center py-12">
-                    <FaStar className="text-6xl text-yellow-400 mx-auto mb-6" />
-                    <h2 className="text-4xl font-black mb-4 text-white font-[family-name:var(--font-heading)]">
-                        Ready to Compete?
-                    </h2>
-                    <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-                        More details, rules, and weekly registration will be posted on event pages.
-                    </p>
-                    <Link href="/events?league=rocket-rush" className="btn-primary px-12 py-4 text-lg inline-block">
-                        View Weekly Events
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent opacity-50" />
+                <FaStar className="text-7xl text-yellow-500 animate-pulse mx-auto opacity-50" />
+                <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none">
+                    READY TO <br />
+                    <span className="text-pink-500">IGNITE?</span>
+                </h2>
+                <p className="text-white/60 text-xl max-w-2xl mx-auto font-medium">
+                    Weekly registration is open now. Join the competition and start building your legacy.
+                </p>
+                <div className="pt-8">
+                    <Link href="/esports/events?league=rocket-rush" className="px-16 py-6 bg-white text-black hover:bg-pink-500 hover:text-white rounded-[2rem] font-black uppercase tracking-[0.2em] transition-all hover:scale-105 inline-block text-lg shadow-2xl">
+                        REGISTER NOW
                     </Link>
-                </Card>
-            </motion.div>
+                </div>
+            </motion.section>
         </main>
     );
 }

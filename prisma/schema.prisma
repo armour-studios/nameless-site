@@ -30,12 +30,18 @@ model User {
   youtube       String?
   startggSlug   String?   // e.g. "jonzey" from start.gg/user/jonzey
   
+  // Competition Hub Relations
+  captainOf     Team[]    @relation("TeamCaptain")
+  teamMemberships TeamMember[]
+  uploadedReplays Replay[]
+  
   // 2FA fields
   twoFactorEnabled Boolean @default(false)
   twoFactorSecret  String?
   
   accounts      Account[]
   sessions      Session[]
+  newsArticles  NewsArticle[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -110,19 +116,62 @@ model Event {
   @@unique([slug, tournamentId])
 }
 
+// Enhanced Team Model for User Management
 model Team {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  school      String?
-  logoUrl     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String       @id @default(cuid())
+  name            String
+  slug            String       @unique
+  school          String?
+  logoUrl         String?
   
-  players     Player[]
-  tournaments TournamentTeam[]
-  homeMatches Match[]  @relation("HomeTeam")
-  awayMatches Match[]  @relation("AwayTeam")
+  // Team Profile Fields
+  logo            String?
+  bio             String?
+  twitter         String?
+  discord         String?
+  instagram       String?
+  website         String?
+
+  // New Fields for Competition Hub
+  captainId       String       // Made non-optional as per instruction
+  captain         User         @relation("TeamCaptain", fields: [captainId], references: [id])
+  members         TeamMember[]
+  startggTeamSlug String?      // e.g. "team/nameless-esports"
+  replays         Replay[]
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  // Existing Relations
+  players         Player[]     // Keeping for backward compatibility if needed
+  tournaments     TournamentTeam[]
+  homeMatches     Match[]      @relation("HomeTeam")
+  awayMatches     Match[]      @relation("AwayTeam")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  userId    String
+  teamId    String
+  role      String   @default("PLAYER") // CAPTAIN, PLAYER, SUBSTITUTE, COACH
+  user      User     @relation(fields: [userId], references: [id])
+  team      Team     @relation(fields: [teamId], references: [id])
+  joinedAt  DateTime @default(now())
+
+  @@unique([userId, teamId])
+}
+
+model Replay {
+  id            String   @id @default(cuid())
+  ballchasingId String   @unique // ID from ballchasing.com
+  title         String
+  teamId        String?
+  team          Team?    @relation(fields: [teamId], references: [id])
+  uploaderId    String
+  uploader      User     @relation(fields: [uploaderId], references: [id])
+  status        String   @default("PENDING") // PENDING, PROCESSED, FAILED
+  stats         Json?    // Cached stats
+  uploadedAt    DateTime @default(now())
 }
 
 model Player {
@@ -190,16 +239,23 @@ model School {
 }
 
 model NewsArticle {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  content     String
-  excerpt     String?
-  coverImage  String?
-  author      String?
-  category    String   @default("General")
-  published   Boolean  @default(false)
-  publishedAt DateTime?
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  content       String
+  excerpt       String?
+  coverImage    String?
+  featuredImage String?  // Large featured image for article header
+  bannerImage   String?  // Wide banner image
+  author        String?   // Keep for legacy/display
+  authorId      String?
+  authorUser    User?     @relation(fields: [authorId], references: [id])
+  category      String   @default("General")
+  tags          String[] @default([])
+  published     Boolean  @default(false)
+  publishedAt   DateTime?
+  deletedAt     DateTime? // For soft delete
+  views         Int      @default(0)
   
   // SEO Fields
   metaTitle       String?
@@ -229,4 +285,35 @@ model Invoice {
   
   @@index([status])
   @@index([clientEmail])
+}
+
+model SiteSettings {
+  id                       String   @id @default(cuid())
+  siteName                 String   @default("Nameless Esports")
+  siteDescription          String   @default("Professional esports organization and gaming community")
+  seoKeywords              String   @default("esports, competitive gaming, tournaments, leagues")
+  contactEmail             String   @default("contact@namelessesports.com")
+  
+  socialTwitter            String   @default("@NamelessEsports")
+  showSocialTwitter        Boolean  @default(true)
+  socialDiscord            String   @default("nameless")
+  showSocialDiscord        Boolean  @default(true)
+  socialYoutube            String   @default("@NamelessEsports")
+  showSocialYoutube        Boolean  @default(true)
+  socialTwitch             String   @default("namelessesportshq")
+  showSocialTwitch         Boolean  @default(true)
+  socialInstagram          String   @default("namelessesports")
+  showSocialInstagram      Boolean  @default(false)
+  socialTiktok             String   @default("namelessesports")
+  showSocialTiktok         Boolean  @default(false)
+
+  maintenanceMode          Boolean  @default(false)
+  allowRegistration        Boolean  @default(true)
+  requireEmailVerification Boolean  @default(false)
+  defaultUserRole          String   @default("user")
+  primaryColor             String   @default("#ec4899")
+  accentColor              String   @default("#8b5cf6")
+  cardBackgroundColor      String   @default("#150a20")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 }

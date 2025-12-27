@@ -1,15 +1,16 @@
 "use client";
 
 import Card from "@/components/Card";
-import { FaUsers, FaRocket, FaGraduationCap, FaLaptop, FaTrophy, FaHandshake, FaBullseye, FaGlobe, FaLightbulb } from "react-icons/fa";
+import { FaUsers, FaRocket, FaGraduationCap, FaLaptop, FaTrophy, FaHandshake, FaBullseye, FaGlobe, FaLightbulb, FaCheckCircle, FaStar } from "react-icons/fa";
 import { motion } from "framer-motion";
+import PageTitle from "@/components/PageTitle";
 
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.1
+            staggerChildren: 0.15
         }
     }
 };
@@ -27,31 +28,36 @@ const itemVariants = {
 
 export default function About() {
     return (
-        <main className="min-h-screen pb-20 px-4 md:px-8 max-w-[1400px] mx-auto">
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-4 mb-12 pt-8"
-            >
-                <h1 className="text-4xl md:text-7xl font-[family-name:var(--font-heading)] font-black text-white uppercase tracking-tighter">
-                    OUR <span className="text-gradient">VISION</span>
-                </h1>
-                <div className="h-[2px] flex-1 bg-gradient-to-r from-pink-500 to-transparent"></div>
-            </motion.div>
+        <main className="min-h-screen pb-20 px-4 md:px-8 max-w-[1600px] mx-auto space-y-24">
+            <PageTitle
+                title="OUR"
+                highlight="VISION"
+                description="Redefining the relationship between competitive gaming, education, and community development."
+            />
 
-            {/* Our Impact / Intro */}
+            {/* Premium Intro / Impact */}
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8 }}
-                className="mb-16"
             >
-                <Card className="p-8 md:p-12 bg-gradient-to-br from-purple-600/10 via-[#0a0014] to-pink-600/10 border-white/10 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-pink-500/10 blur-[100px] -z-10 group-hover:bg-pink-500/20 transition-all"></div>
-                    <p className="text-gray-300 leading-relaxed text-xl md:text-2xl font-medium max-w-4xl">
-                        Nameless Esports is more than a gaming organization. We are committed to building pathways for young people through <span className="text-white font-bold">esports, education, and community-driven programming.</span> By combining competitive gaming with life skills development, mentorship, and career preparation, we help individuals unlock potential—both online and in person.
-                    </p>
-                </Card>
+                <div className="relative group overflow-hidden rounded-[3rem] bg-white/[0.03] border border-white/10 p-10 md:p-16">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 blur-[120px] -z-10 group-hover:bg-purple-500/20 transition-all duration-1000" />
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500/5 blur-[100px] -z-10 group-hover:bg-pink-500/10 transition-all duration-1000" />
+
+                    <div className="max-w-5xl space-y-8">
+                        <div className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+                            <FaStar className="text-yellow-500 text-xs animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">Our Identity</span>
+                        </div>
+                        <p className="text-white text-2xl md:text-4xl font-bold leading-[1.15] tracking-tight">
+                            Nameless Esports is more than a gaming organization. We are <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">architects of opportunity</span>, building pathways through esports, education, and professional programming.
+                        </p>
+                        <p className="text-white/40 text-lg md:text-xl font-medium leading-relaxed max-w-3xl">
+                            By combining competitive gaming with life skills development, mentorship, and career preparation, we help individuals unlock their full potential—online and in the real world.
+                        </p>
+                    </div>
+                </div>
             </motion.div>
 
             {/* Core Pillars */}
@@ -60,190 +66,116 @@ export default function About() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20"
+                className="grid grid-cols-1 md:grid-cols-2 gap-8"
             >
                 <motion.div variants={itemVariants}>
-                    <Card className="h-full border-pink-500/20 hover:border-pink-500/50 transition-all group overflow-hidden relative">
-                        <div className="absolute -right-8 -bottom-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <FaBullseye size={160} />
+                    <div className="h-full bg-white/[0.03] border border-white/10 rounded-[3rem] p-10 md:p-12 space-y-8 relative overflow-hidden group hover:bg-white/[0.05] transition-all">
+                        <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-purple-500/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                        <div className="w-20 h-20 rounded-[2rem] bg-purple-500/10 border border-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <FaRocket className="text-4xl text-purple-400" />
                         </div>
-                        <div className="flex items-start gap-6">
-                            <div className="p-4 bg-pink-500/20 border border-pink-500 rounded-2xl shadow-[0_0_20px_rgba(236,72,153,0.3)]">
-                                <FaRocket className="text-pink-400 text-3xl" />
-                            </div>
-                            <div>
-                                <h2 className="text-3xl font-black mb-4 uppercase tracking-tight text-white font-[family-name:var(--font-heading)]">Our Mission</h2>
-                                <p className="text-gray-400 leading-relaxed text-lg">
-                                    Nameless Esports empowers youth by harnessing the transformative power of esports, education, and technology. We deliver inclusive, skill-building programs that support personal development, academic success, and career readiness.
-                                </p>
-                            </div>
-                        </div>
-                    </Card>
-                </motion.div>
-
-                <motion.div variants={itemVariants}>
-                    <Card className="h-full border-purple-500/20 hover:border-purple-500/50 transition-all group overflow-hidden relative">
-                        <div className="absolute -right-8 -bottom-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <FaGlobe size={160} />
-                        </div>
-                        <div className="flex items-start gap-6">
-                            <div className="p-4 bg-purple-500/20 border border-purple-500 rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                                <FaLightbulb className="text-purple-400 text-3xl" />
-                            </div>
-                            <div>
-                                <h2 className="text-3xl font-black mb-4 uppercase tracking-tight text-white font-[family-name:var(--font-heading)]">Strategic Impact</h2>
-                                <p className="text-gray-400 leading-relaxed text-lg">
-                                    Through competitive gaming, STEM education, mentorship, and strategic community partnerships, we create safe and inspiring spaces where young people can grow, lead, and shape the future of technology.
-                                </p>
-                            </div>
-                        </div>
-                    </Card>
-                </motion.div>
-            </motion.div>
-
-            {/* Online Programs */}
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-            >
-                <h2 className="text-3xl font-black mb-8 text-white uppercase tracking-tight flex items-center gap-4">
-                    Online Programs
-                    <div className="h-px w-20 bg-pink-500/50"></div>
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20">
-                    <motion.div variants={itemVariants}>
-                        <Card className="h-full hover:bg-white/5 transition-colors border-white/5">
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400">
-                                    <FaUsers size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold text-white uppercase tracking-wide">Coaching Services</h3>
-                            </div>
-                            <p className="text-gray-400">
-                                One-on-one and group coaching led by experienced esports coaches who focus on both gameplay mechanics and personal development. We help players improve competitive performance, communication skills, goal setting, and mindset.
+                        <div className="space-y-4">
+                            <h3 className="text-3xl font-black text-white uppercase tracking-tight font-[family-name:var(--font-heading)]">Our Mission</h3>
+                            <p className="text-white/40 text-lg font-medium leading-relaxed">
+                                Empowering youth by harnessing the transformative power of esports and technology. We deliver inclusive, skill-building programs that support personal development, academic success, and career readiness.
                             </p>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants}>
-                        <Card className="h-full hover:bg-white/5 transition-colors border-white/5">
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="p-3 bg-pink-500/10 rounded-xl text-pink-400">
-                                    <FaGraduationCap size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold text-white uppercase tracking-wide">Education Courses</h3>
-                            </div>
-                            <p className="text-gray-400">
-                                Esports education courses covering team management, content creation, casting and broadcasting, tournament operations, and career exploration. Available to individuals, schools, and youth organizations.
-                            </p>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants}>
-                        <Card className="h-full hover:bg-white/5 transition-colors border-white/5">
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="p-3 bg-cyan-500/10 rounded-xl text-cyan-400">
-                                    <FaTrophy size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold text-white uppercase tracking-wide">Tournament Platform</h3>
-                            </div>
-                            <p className="text-gray-400">
-                                Our digital tournament platform allows players of all skill levels to participate in seasonal leagues, weekly brackets, and community competitions. Designed to be safe, inclusive, and competitive.
-                            </p>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants}>
-                        <Card className="h-full hover:bg-white/5 transition-colors border-white/5">
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="p-3 bg-green-500/10 rounded-xl text-green-400">
-                                    <FaHandshake size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold text-white uppercase tracking-wide">Community Hub</h3>
-                            </div>
-                            <p className="text-gray-400">
-                                Through Discord, we maintain a moderated and welcoming space that acts as our central hub for announcements, support, discussion, and community building.
-                            </p>
-                        </Card>
-                    </motion.div>
-                </div>
-            </motion.div>
-
-            {/* Investing in Future */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="mb-20"
-            >
-                <Card className="relative overflow-hidden p-0 border-white/10 bg-[#0a0014]">
-                    <div className="grid grid-cols-1 lg:grid-cols-2">
-                        <div className="p-8 md:p-12 z-10">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="p-3 bg-purple-500 border border-purple-400 rounded-lg text-white shadow-[0_0_15px_rgba(168,85,247,0.5)]">
-                                    <FaLaptop size={24} />
-                                </div>
-                                <h2 className="text-3xl font-black text-white uppercase tracking-tight font-[family-name:var(--font-heading)]">Investing in the Future</h2>
-                            </div>
-                            <h3 className="text-2xl font-bold mb-6 text-purple-400">Esports Youth Centers</h3>
-                            <div className="space-y-4 text-gray-400 text-lg leading-relaxed">
-                                <p>
-                                    Our long-term vision includes building dedicated youth centers in underserved communities. These spaces will serve as <span className="text-white font-semibold">hybrid gaming labs and learning hubs</span>, providing access to equipment and mentorship.
-                                </p>
-                                <p>
-                                    Each center will be staffed by mentors who understand the needs of young people, offering workshops, coaching, and a safe environment where students can thrive in the digital world.
-                                </p>
-                            </div>
-                        </div>
-                        <div className="relative h-64 lg:h-auto overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0014] to-transparent z-10 hidden lg:block"></div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0014] to-transparent z-10 lg:hidden"></div>
-                            <img
-                                src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800"
-                                alt="Gaming Lab"
-                                className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
-                            />
                         </div>
                     </div>
-                </Card>
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                    <div className="h-full bg-white/[0.03] border border-white/10 rounded-[3rem] p-10 md:p-12 space-y-8 relative overflow-hidden group hover:bg-white/[0.05] transition-all">
+                        <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-pink-500/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                        <div className="w-20 h-20 rounded-[2rem] bg-pink-500/10 border border-pink-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <FaLightbulb className="text-4xl text-pink-400" />
+                        </div>
+                        <div className="space-y-4">
+                            <h3 className="text-3xl font-black text-white uppercase tracking-tight font-[family-name:var(--font-heading)]">Strategic Impact</h3>
+                            <p className="text-white/40 text-lg font-medium leading-relaxed">
+                                Through competitive gaming, STEM education, and strategic mentorship, we create safe and inspiring spaces where young people can grow, lead, and shape the future of technology.
+                            </p>
+                        </div>
+                    </div>
+                </motion.div>
+            </motion.div>
+
+            {/* Future Investing Section */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+            >
+                <div className="bg-[#0a0014] border border-white/10 rounded-[3rem] overflow-hidden group">
+                    <div className="grid grid-cols-1 lg:grid-cols-2">
+                        <div className="p-10 md:p-16 space-y-8">
+                            <div className="inline-flex items-center gap-3 bg-purple-500/10 border border-purple-500/20 px-4 py-2 rounded-xl">
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-purple-400">Long-term roadmap</span>
+                            </div>
+                            <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter leading-none font-[family-name:var(--font-heading)]">RE-IMAGINING <br /><span className="text-purple-500">YOUTH CENTERS</span></h2>
+                            <p className="text-white/40 text-lg font-medium leading-relaxed">
+                                We are developing dedicated youth hubs in underserved communities. These spaces function as hybrid gaming labs and learning environments, providing professional-grade equipment and mentorship.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                                <div className="space-y-2">
+                                    <h4 className="text-white font-black uppercase tracking-widest text-xs">Gaming Labs</h4>
+                                    <p className="text-white/30 text-xs font-medium">Equipped for high-level play and education.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="text-white font-black uppercase tracking-widest text-xs">Learning Hubs</h4>
+                                    <p className="text-white/30 text-xs font-medium">STEM-focused curriculum and mentorship.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="relative min-h-[400px] overflow-hidden">
+                            <img
+                                src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070"
+                                alt="Gaming Lab"
+                                className="absolute inset-0 w-full h-full object-cover grayscale opacity-30 group-hover:scale-105 group-hover:grayscale-0 group-hover:opacity-50 transition-all duration-[2s]"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-l from-[#0a0014] via-transparent to-transparent" />
+                        </div>
+                    </div>
+                </div>
             </motion.div>
 
             {/* Who We Serve */}
-            <motion.div
+            <motion.section
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
+                className="space-y-12"
             >
-                <h2 className="text-3xl font-black mb-8 text-white uppercase tracking-tight flex items-center gap-4">
-                    Who We Serve
-                    <div className="h-px w-20 bg-purple-500/50"></div>
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="flex items-center gap-6">
+                    <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                        <FaUsers className="text-2xl text-cyan-500" />
+                    </div>
+                    <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">WHO WE <span className="text-cyan-500">SERVE</span></h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[
-                        { title: "Students", text: "Middle and high school students finding their path." },
-                        { title: "Collegiate", text: "College esports organizations and aspiring pros." },
-                        { title: "Creators", text: "Aspiring content creators and digital artists." },
-                        { title: "Educators", text: "Teachers and program leaders building futures." },
-                        { title: "Families", text: "Parents looking for safe, positive environments." },
-                        { title: "Partners", text: "Community leaders in youth development." },
+                        { title: "Students", text: "Middle and high school students finding their path.", icon: FaGraduationCap },
+                        { title: "Collegiate", text: "College esports organizations and aspiring pros.", icon: FaTrophy },
+                        { title: "Creators", text: "Aspiring content creators and digital artists.", icon: FaLaptop },
+                        { title: "Educators", text: "Teachers and program leaders building futures.", icon: FaCheckCircle },
+                        { title: "Families", text: "Parents looking for safe, positive environments.", icon: FaHandshake },
+                        { title: "Partners", text: "Community leaders in youth development.", icon: FaGlobe },
                     ].map((item, idx) => (
                         <motion.div key={idx} variants={itemVariants}>
-                            <Card className="h-full border-white/5 hover:border-pink-500/30 transition-all bg-white/5 backdrop-blur-sm group">
-                                <h3 className="text-lg font-bold text-pink-500 mb-2 uppercase tracking-wide group-hover:text-white transition-colors">
-                                    {item.title}
-                                </h3>
-                                <p className="text-gray-400 text-sm">
-                                    {item.text}
-                                </p>
-                            </Card>
+                            <div className="h-full bg-white/[0.03] border border-white/10 rounded-[2rem] p-8 space-y-6 hover:bg-white/[0.05] transition-all group">
+                                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-cyan-500/10 transition-colors">
+                                    <item.icon className="text-xl text-white/40 group-hover:text-cyan-500 transition-colors" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-black text-white uppercase tracking-tight">{item.title}</h3>
+                                    <p className="text-white/40 text-sm font-medium leading-relaxed">{item.text}</p>
+                                </div>
+                            </div>
                         </motion.div>
                     ))}
                 </div>
-            </motion.div>
-
+            </motion.section>
         </main>
     );
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaDiscord, FaTwitter, FaUser, FaTwitch } from "react-icons/fa";
+import { FaDiscord, FaTwitter, FaUser, FaTwitch, FaInstagram, FaTiktok, FaYoutube } from "react-icons/fa";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 import { useSession, signIn, signOut } from "next-auth/react";
 import UserDropdown from "./UserDropdown";
@@ -18,7 +18,8 @@ const MOCH_NEWS_ITEMS = [
     "Community tournament this Friday at 8PM EST",
 ];
 
-export default function Navbar() {
+
+export default function Navbar({ settings }: { settings?: any }) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLeaguesOpen, setIsLeaguesOpen] = useState(false);
     const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -53,11 +54,18 @@ export default function Navbar() {
 
     const currentTickerItems = tickerItems.length > 0 ? tickerItems : MOCH_NEWS_ITEMS;
 
+    const getSocialUrl = (base: string, input: string) => {
+        if (!input) return '#';
+        if (input.startsWith('http://') || input.startsWith('https://')) return input;
+        if (input.includes(base)) return `https://${input}`;
+        return `https://${base}/${input.replace(/^@/, '')}`;
+    };
+
     return (
         <>
             <header className="fixed top-0 w-full z-50">
                 {/* News Ticker */}
-                <div className="bg-gradient-to-r from-purple-900 to-pink-900 text-white text-sm py-2 overflow-hidden shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
+                <div className="bg-gradient-to-r from-secondary to-primary text-white text-sm py-2 overflow-hidden shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
                     <div className="whitespace-nowrap animate-marquee flex gap-12">
                         {[...currentTickerItems, ...currentTickerItems, ...currentTickerItems].map((item, i) => (
                             <span key={i} className="font-bold tracking-wide uppercase italic">
@@ -82,7 +90,7 @@ export default function Navbar() {
                             </div>
                             <div className="text-2xl font-black font-[family-name:var(--font-heading)] tracking-tight">
                                 <span className="text-white">NAMELESS</span>
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">ESPORTS</span>
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">ESPORTS</span>
                             </div>
                         </Link>
 
@@ -90,7 +98,7 @@ export default function Navbar() {
                         <div className="hidden md:flex items-center gap-8">
                             <Link href="/" className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase">
                                 Home
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
+                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary group-hover:w-full transition-all duration-300"></span>
                             </Link>
 
                             {/* Leagues Dropdown */}
@@ -132,13 +140,17 @@ export default function Navbar() {
                                 </AnimatePresence>
                             </div>
 
-                            <Link href="/events" className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase">
-                                Events
+                            <Link href="/esports/events" className="bg-pink-700 hover:bg-pink-400 text-white hover:text-black px-5 py-2 rounded-lg font-black transition-all shadow-lg shadow-pink-900/40 hover:scale-105 active:scale-95 uppercase text-xs tracking-widest border border-pink-500/30">
+                                Esports
+                            </Link>
+
+                            <Link href="/services" className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase">
+                                Services
                                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
                             </Link>
 
-                            <Link href="/our-vision" className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase">
-                                Our Vision
+                            <Link href="/news" className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase">
+                                News
                                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
                             </Link>
 
@@ -162,18 +174,11 @@ export default function Navbar() {
                                         >
                                             <div className="p-2 flex flex-col gap-1">
                                                 <Link
-                                                    href="/services"
+                                                    href="/our-vision"
                                                     className="px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-sm font-bold text-gray-300 hover:text-cyan-500 uppercase"
                                                     onClick={() => setIsMoreOpen(false)}
                                                 >
-                                                    Services
-                                                </Link>
-                                                <Link
-                                                    href="/news"
-                                                    className="px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-sm font-bold text-gray-300 hover:text-pink-500 uppercase"
-                                                    onClick={() => setIsMoreOpen(false)}
-                                                >
-                                                    News
+                                                    Our Vision
                                                 </Link>
                                                 <Link
                                                     href="/store"
@@ -182,29 +187,52 @@ export default function Navbar() {
                                                 >
                                                     Store
                                                 </Link>
+                                                <Link
+                                                    href="/contact"
+                                                    className="px-4 py-3 rounded-lg hover:bg-white/5 transition-colors text-sm font-bold text-gray-300 hover:text-pink-500 uppercase"
+                                                    onClick={() => setIsMoreOpen(false)}
+                                                >
+                                                    Contact
+                                                </Link>
                                             </div>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                             </div>
-
-                            <Link href="/contact" className="text-gray-300 hover:text-white font-bold transition-colors relative group uppercase">
-                                Contact
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
-                            </Link>
                         </div>
 
                         {/* Right Side Actions */}
                         <div className="hidden md:flex items-center gap-4">
-                            <a href="https://discord.com/invite/G9uMk2N9bY" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-                                <FaDiscord size={22} />
-                            </a>
-                            <a href="https://x.com/nameless_llc" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-                                <FaTwitter size={22} />
-                            </a>
-                            <a href="https://www.twitch.tv/namelessesportshq" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
-                                <FaTwitch size={22} />
-                            </a>
+                            {settings?.showSocialDiscord && settings?.socialDiscord && (
+                                <a href={getSocialUrl('discord.gg', settings.socialDiscord)} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                                    <FaDiscord size={22} />
+                                </a>
+                            )}
+                            {settings?.showSocialTwitter && settings?.socialTwitter && (
+                                <a href={getSocialUrl('x.com', settings.socialTwitter)} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                                    <FaTwitter size={22} />
+                                </a>
+                            )}
+                            {settings?.showSocialTwitch && settings?.socialTwitch && (
+                                <a href={getSocialUrl('twitch.tv', settings.socialTwitch)} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                                    <FaTwitch size={22} />
+                                </a>
+                            )}
+                            {settings?.showSocialYoutube && settings?.socialYoutube && (
+                                <a href={getSocialUrl('youtube.com', settings.socialYoutube)} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                                    <FaYoutube size={22} />
+                                </a>
+                            )}
+                            {settings?.showSocialInstagram && settings?.socialInstagram && (
+                                <a href={getSocialUrl('instagram.com', settings.socialInstagram)} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                                    <FaInstagram size={22} />
+                                </a>
+                            )}
+                            {settings?.showSocialTiktok && settings?.socialTiktok && (
+                                <a href={getSocialUrl('tiktok.com', settings.socialTiktok)} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                                    <FaTiktok size={22} />
+                                </a>
+                            )}
 
                             {status === "loading" ? (
                                 <div className="px-5 py-2.5 rounded-lg bg-white/10 animate-pulse">
@@ -214,7 +242,7 @@ export default function Navbar() {
                                 <UserDropdown />
                             ) : (
                                 <Link href="/login">
-                                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 transition-all font-semibold">
+                                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-primary to-secondary hover:brightness-110 transition-all font-semibold">
                                         <FaUser size={14} /> Login
                                     </button>
                                 </Link>
@@ -244,15 +272,16 @@ export default function Navbar() {
                         <nav className="flex flex-col gap-6">
                             {[
                                 { name: 'HOME', path: '/' },
-                                { name: 'EVENTS', path: '/events' },
-                                { name: 'OUR VISION', path: '/our-vision' },
-                                { name: 'CONTACT', path: '/contact' },
+                                { name: 'ESPORTS HQ', path: '/esports' },
+                                { name: 'ESPORTS', path: '/esports/events' },
+                                { name: 'SERVICES', path: '/services' },
+                                { name: 'NEWS', path: '/news' },
                             ].map((link) => (
                                 <Link
                                     key={link.name}
                                     href={link.path}
                                     onClick={() => setIsOpen(false)}
-                                    className="text-2xl font-bold text-gray-300 hover:text-pink-500 transition-colors"
+                                    className={`text-3xl font-bold transition-colors ${link.name === 'ESPORTS' ? 'bg-pink-700 hover:bg-pink-400 text-white hover:text-black px-6 py-4 rounded-xl shadow-lg shadow-pink-900/30 text-center flex items-center justify-center gap-2' : 'text-gray-300 hover:text-pink-500'}`}
                                 >
                                     {link.name}
                                 </Link>
@@ -275,18 +304,11 @@ export default function Navbar() {
                                 </Link>
                                 <div className="h-px bg-white/10 my-2"></div>
                                 <Link
-                                    href="/services"
+                                    href="/our-vision"
                                     onClick={() => setIsOpen(false)}
-                                    className="text-xl font-bold text-cyan-500"
+                                    className="text-xl font-bold text-gray-400"
                                 >
-                                    SERVICES
-                                </Link>
-                                <Link
-                                    href="/news"
-                                    onClick={() => setIsOpen(false)}
-                                    className="text-xl font-bold text-pink-500"
-                                >
-                                    NEWS
+                                    OUR VISION
                                 </Link>
                                 <Link
                                     href="/store"
@@ -294,6 +316,13 @@ export default function Navbar() {
                                     className="text-xl font-bold text-purple-500"
                                 >
                                     STORE
+                                </Link>
+                                <Link
+                                    href="/contact"
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-xl font-bold text-gray-400"
+                                >
+                                    CONTACT
                                 </Link>
                             </div>
                             {session ? (

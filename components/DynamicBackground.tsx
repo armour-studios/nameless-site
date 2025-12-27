@@ -29,13 +29,13 @@ export default function DynamicBackground() {
                 }}
                 transition={{ type: "spring", damping: 50, stiffness: 200 }}
                 style={{
-                    background: "radial-gradient(circle, rgba(217, 70, 239, 0.15) 0%, rgba(5, 0, 10, 0) 70%)",
+                    background: "radial-gradient(circle, var(--primary) 0%, rgba(5, 0, 10, 0) 70%)",
                 }}
             />
 
             {/* Floating Orbs */}
             <motion.div
-                className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-purple-900/20 rounded-full blur-[100px]"
+                className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-secondary/20 rounded-full blur-[100px]"
                 animate={{
                     x: [0, 100, 0],
                     y: [0, 50, 0],
@@ -44,7 +44,7 @@ export default function DynamicBackground() {
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
             />
             <motion.div
-                className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-pink-900/20 rounded-full blur-[100px]"
+                className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-primary/20 rounded-full blur-[100px]"
                 animate={{
                     x: [0, -100, 0],
                     y: [0, -50, 0],
@@ -53,7 +53,7 @@ export default function DynamicBackground() {
                 transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
             />
             <motion.div
-                className="absolute top-[40%] left-[60%] w-[30vw] h-[30vw] bg-blue-900/10 rounded-full blur-[80px]"
+                className="absolute top-[40%] left-[60%] w-[30vw] h-[30vw] bg-accent/10 rounded-full blur-[80px]"
                 animate={{
                     x: [0, -50, 50, 0],
                     y: [0, 100, -100, 0],

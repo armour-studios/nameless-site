@@ -4,8 +4,9 @@ import Card from "@/components/Card";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { FaUser, FaTrophy, FaCalendarAlt, FaGamepad } from "react-icons/fa";
+import { FaUser, FaTrophy, FaCalendarAlt, FaGamepad, FaCog, FaChartLine } from "react-icons/fa";
 import Link from "next/link";
+import PageTitle from "@/components/PageTitle";
 
 export default function Dashboard() {
     const { data: session, status } = useSession();
@@ -28,65 +29,94 @@ export default function Dashboard() {
     if (!session) return null;
 
     return (
-        <main className="min-h-screen pt-8 pb-20 px-4 md:px-8 max-w-[1400px] mx-auto">
-            <div className="flex items-center justify-between mb-8">
+        <main className="min-h-screen pt-8 pb-20 px-4 md:px-8 max-w-[1600px] mx-auto space-y-10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/10 pb-8">
                 <div>
-                    <h1 className="text-4xl md:text-6xl font-[family-name:var(--font-heading)] font-black text-white">
-                        User <span className="text-gradient">Dashboard</span>
-                    </h1>
-                    <p className="text-gray-400 mt-2">Welcome back, {session.user?.name}</p>
+                    <PageTitle
+                        title="USER"
+                        highlight="DASHBOARD"
+                        description={`Welcome back, ${session.user?.name}. Manage your competitive career.`}
+                        className="!mb-0 !pt-0"
+                    />
                 </div>
                 {session.user.role === "admin" && (
-                    <Link href="/admin" className="px-6 py-2 bg-red-600/20 text-red-500 border border-red-500/30 rounded-lg hover:bg-red-600/30 transition-colors font-bold">
-                        Go to Admin Dashboard
+                    <Link href="/admin" className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/50 text-red-500 px-4 py-2 rounded-lg font-bold transition-all">
+                        <FaCog /> Admin Panel
                     </Link>
                 )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Profile Card */}
-                <Card className="col-span-1 md:col-span-1">
-                    <div className="flex flex-col items-center p-4">
-                        <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 mb-4 border-2 border-pink-500">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={session.user.image || "/placeholder-user.jpg"}
-                                alt={session.user.name || "User"}
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                        <h2 className="text-xl font-bold text-white">{session.user.name}</h2>
-                        <p className="text-sm text-gray-500">{session.user.email}</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column: Profile Card */}
+                <div className="lg:col-span-1">
+                    <div className="bg-[#111] border border-white/10 rounded-2xl p-6 sticky top-24">
+                        <div className="flex flex-col items-center text-center">
+                            <div className="w-32 h-32 rounded-full p-1 bg-gradient-to-br from-pink-500 to-purple-600 mb-4">
+                                <div className="w-full h-full rounded-full overflow-hidden bg-black">
+                                    <img
+                                        src={session.user.image || "/placeholder-user.jpg"}
+                                        alt={session.user.name || "User"}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            </div>
+                            <h2 className="text-2xl font-black text-white mb-1">{session.user.name}</h2>
+                            <p className="text-gray-500 text-sm font-mono mb-6">{session.user.email}</p>
 
-                        <Link href="/profile" className="mt-6 w-full py-2 text-center bg-white/5 hover:bg-white/10 rounded-lg border border-white/10 transition-colors">
-                            View Public Profile
+                            <Link href="/profile" className="w-full btn-primary py-3 rounded-xl flex items-center justify-center gap-2">
+                                <FaUser /> View Public Profile
+                            </Link>
+
+                            <div className="mt-8 w-full space-y-4">
+                                <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                                    <div className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-1">Status</div>
+                                    <div className="text-green-400 font-bold flex items-center justify-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column: Quick Actions & Activity */}
+                <div className="lg:col-span-2 space-y-8">
+                    {/* Quick Access Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Link href="/esports" className="group">
+                            <div className="bg-gradient-to-br from-pink-900/40 to-purple-900/40 border border-white/10 hover:border-pink-500/50 rounded-2xl p-6 transition-all hover:bg-white/5 h-full">
+                                <FaGamepad className="text-4xl text-pink-500 mb-4 group-hover:scale-110 transition-transform" />
+                                <h3 className="text-xl font-bold text-white mb-2">Esports HQ</h3>
+                                <p className="text-gray-400 text-sm">Manage teams, enter tournaments, and view live brackets.</p>
+                            </div>
+                        </Link>
+
+                        <Link href="/esports/events" className="group">
+                            <div className="bg-[#111] border border-white/10 hover:border-purple-500/50 rounded-2xl p-6 transition-all hover:bg-white/5 h-full">
+                                <FaCalendarAlt className="text-4xl text-purple-500 mb-4 group-hover:scale-110 transition-transform" />
+                                <h3 className="text-xl font-bold text-white mb-2">Events & Schedule</h3>
+                                <p className="text-gray-400 text-sm">Browse upcoming tournaments and register your team.</p>
+                            </div>
                         </Link>
                     </div>
-                </Card>
 
-                {/* Main Content */}
-                <div className="col-span-1 md:col-span-2 space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Card className="p-6 cursor-pointer hover:bg-white/5 transition-colors">
-                            <FaGamepad className="text-3xl text-pink-500 mb-3" />
-                            <h3 className="font-bold text-lg mb-1">Competition Hub</h3>
-                            <p className="text-sm text-gray-400">Join tournaments and manage teams</p>
-                        </Card>
-                        <Card className="p-6 cursor-pointer hover:bg-white/5 transition-colors">
-                            <FaCalendarAlt className="text-3xl text-purple-500 mb-3" />
-                            <h3 className="font-bold text-lg mb-1">Upcoming Events</h3>
-                            <p className="text-sm text-gray-400">View schedule and registrations</p>
-                        </Card>
-                    </div>
-
-                    <Card className="p-6">
-                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    {/* Recent Activity */}
+                    <div className="bg-[#111] border border-white/10 rounded-2xl p-8">
+                        <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
                             <FaTrophy className="text-yellow-500" /> Recent Activity
                         </h3>
-                        <div className="text-center py-8 text-gray-500">
-                            No recent activity found. Join a tournament to get started!
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                                <FaChartLine className="text-gray-600 text-2xl" />
+                            </div>
+                            <h4 className="text-lg font-bold text-gray-300">No recent activity</h4>
+                            <p className="text-gray-500 text-sm max-w-xs mt-2">Join a tournament or create a team to start building your career history.</p>
+                            <Link href="/esports" className="mt-6 text-pink-400 font-bold hover:text-pink-300 hover:underline">
+                                Go to Esports HQ →
+                            </Link>
                         </div>
-                    </Card>
+                    </div>
                 </div>
             </div>
         </main>

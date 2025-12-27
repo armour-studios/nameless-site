@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaArrowLeft, FaSave, FaImage, FaCloudUploadAlt, FaTimes } from "react-icons/fa";
 import dynamic from 'next/dynamic';
+import { BannerUpload } from "@/components/BannerCropper";
 
 // Dynamic import for ReactQuill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
@@ -26,12 +27,16 @@ export default function NewsEditor({ params }: { params: Promise<{ id: string }>
         excerpt: "",
         content: "",
         coverImage: "",
+        featuredImage: "",
+        bannerImage: "",
         category: "General",
+        tags: [] as string[],
         published: false,
         metaTitle: "",
         metaDescription: "",
         keywords: ""
     });
+    const [tagInput, setTagInput] = useState("");
 
     useEffect(() => {
         if (!isNew) {
@@ -48,17 +53,48 @@ export default function NewsEditor({ params }: { params: Promise<{ id: string }>
 
     const handleChange = (e: any) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+
+        setFormData(prev => {
+            let newFormData = {
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            };
+
+            // Auto-slug if it's a new article and title changed
+            if (isNew && name === "title") {
+                newFormData.slug = value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)+/g, '');
+            }
+
+            return newFormData;
+        });
     };
 
     const handleContentChange = (content: string) => {
         setFormData(prev => ({ ...prev, content }));
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAddTag = (e?: React.FormEvent) => {
+        e?.preventDefault();
+        if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
+            setFormData(prev => ({
+                ...prev,
+                tags: [...prev.tags, tagInput.trim()]
+            }));
+            setTagInput("");
+        }
+    };
+
+    const removeTag = (tagToRemove: string) => {
+        setFormData(prev => ({
+            ...prev,
+            tags: prev.tags.filter(t => t !== tagToRemove)
+        }));
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'coverImage' | 'featuredImage' | 'bannerImage' = 'coverImage') => {
         if (!e.target.files || e.target.files.length === 0) return;
 
         const file = e.target.files[0];
@@ -74,7 +110,7 @@ export default function NewsEditor({ params }: { params: Promise<{ id: string }>
 
             if (res.ok) {
                 const data = await res.json();
-                setFormData(prev => ({ ...prev, coverImage: data.url }));
+                setFormData(prev => ({ ...prev, [field]: data.url }));
             } else {
                 alert("Upload failed");
             }
@@ -101,7 +137,6 @@ export default function NewsEditor({ params }: { params: Promise<{ id: string }>
             });
 
             if (res.ok) {
-                alert("Article saved!");
                 router.refresh(); // Refresh the list page data
                 router.push("/admin/news");
             } else {
@@ -309,7 +344,7 @@ export default function NewsEditor({ params }: { params: Promise<{ id: string }>
                                         <input
                                             type="file"
                                             accept="image/*"
-                                            onChange={handleImageUpload}
+                                            onChange={(e) => handleImageUpload(e, 'coverImage')}
                                             className="hidden"
                                             id="cover-upload"
                                         />
@@ -327,43 +362,93 @@ export default function NewsEditor({ params }: { params: Promise<{ id: string }>
                                     </div>
                                 )}
                             </div>
+
+                            {/* Banner Image with Cropper */}
+                            <div>
+                                <label className="block text-gray-400 font-bold mb-2 uppercase text-xs tracking-widest">Banner Image</label>
+                                <BannerUpload
+                                    value={formData.bannerImage}
+                                    onChange={(url) => setFormData(p => ({ ...p, bannerImage: url }))}
+                                />
+                            </div>
                         </div>
 
-                        {/* SEO Settings */}
-                        <div className="bg-[#0a0014] border border-white/10 rounded-2xl p-6 space-y-6">
-                            <h3 className="text-white font-bold border-b border-white/10 pb-4">SEO Settings</h3>
-                            <div>
-                                <label className="block text-gray-400 font-bold mb-2 uppercase text-xs tracking-widest">Meta Title</label>
-                                <input
-                                    type="text"
-                                    name="metaTitle"
-                                    value={(formData as any).metaTitle || ""}
-                                    onChange={handleChange}
-                                    className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-white text-sm focus:border-pink-500 focus:outline-none"
-                                    placeholder="SEO Title (optional)"
-                                />
+                        {/* SEO & Metadata Settings */}
+                        <div className="bg-[#0a0014] border border-white/10 rounded-2xl p-8 space-y-8">
+                            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                                <h3 className="text-xl font-black text-white uppercase tracking-tighter">SEO & Metadata</h3>
                             </div>
-                            <div>
-                                <label className="block text-gray-400 font-bold mb-2 uppercase text-xs tracking-widest">Meta Description</label>
-                                <textarea
-                                    name="metaDescription"
-                                    value={(formData as any).metaDescription || ""}
-                                    onChange={handleChange}
-                                    rows={3}
-                                    className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-white text-sm focus:border-pink-500 focus:outline-none"
-                                    placeholder="Brief description for search engines..."
-                                ></textarea>
-                            </div>
-                            <div>
-                                <label className="block text-gray-400 font-bold mb-2 uppercase text-xs tracking-widest">Keywords</label>
-                                <input
-                                    type="text"
-                                    name="keywords"
-                                    value={(formData as any).keywords || ""}
-                                    onChange={handleChange}
-                                    className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-white text-sm focus:border-pink-500 focus:outline-none"
-                                    placeholder="esports, rocket league, tournaments..."
-                                />
+
+                            <div className="space-y-6">
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <label className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Meta Title</label>
+                                        <span className={`text-[10px] font-mono ${formData.metaTitle.length > 60 ? 'text-red-500' : 'text-gray-500'}`}>
+                                            {formData.metaTitle.length}/60 characters
+                                        </span>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="metaTitle"
+                                        value={formData.metaTitle}
+                                        onChange={handleChange}
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white text-sm focus:border-pink-500 focus:outline-none transition-all"
+                                        placeholder="Enter meta title..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <label className="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Meta Description</label>
+                                        <span className={`text-[10px] font-mono ${formData.metaDescription.length > 160 ? 'text-red-500' : 'text-gray-500'}`}>
+                                            {formData.metaDescription.length}/160 characters
+                                        </span>
+                                    </div>
+                                    <textarea
+                                        name="metaDescription"
+                                        value={formData.metaDescription}
+                                        onChange={handleChange}
+                                        rows={4}
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-white text-sm focus:border-pink-500 focus:outline-none transition-all resize-none"
+                                        placeholder="SEO description (160 characters max)"
+                                    ></textarea>
+                                </div>
+
+                                <div>
+                                    <label className="block text-gray-400 font-bold mb-2 uppercase text-[10px] tracking-widest">Tags</label>
+                                    <div className="flex gap-2 mb-4">
+                                        <input
+                                            type="text"
+                                            value={tagInput}
+                                            onChange={(e) => setTagInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleAddTag();
+                                                }
+                                            }}
+                                            className="flex-1 bg-black/50 border border-white/10 rounded-xl p-4 text-white text-sm focus:border-pink-500 focus:outline-none"
+                                            placeholder="Add a tag and press Enter"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleAddTag()}
+                                            className="px-6 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-all uppercase text-xs"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {formData.tags.map(tag => (
+                                            <span key={tag} className="flex items-center gap-2 bg-pink-500/10 text-pink-500 px-3 py-1.5 rounded-lg text-xs font-bold border border-pink-500/20">
+                                                {tag}
+                                                <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-500">
+                                                    <FaTimes />
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

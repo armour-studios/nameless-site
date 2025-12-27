@@ -12,12 +12,13 @@ export async function PUT(request: Request) {
 
         const data = await request.json();
 
-        const { name, bio, bannerImage, image, twitter, discord, twitch, youtube, startggSlug } = data;
+        const { name, username, bio, bannerImage, image, twitter, discord, twitch, youtube, startggSlug } = data;
 
         const updatedUser = await prisma.user.update({
             where: { email: session.user.email },
             data: {
                 name,
+                username,
                 bio,
                 bannerImage,
                 image,

@@ -10,12 +10,35 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        const { searchParams } = new URL(request.url);
+        const showDeleted = searchParams.get("deleted") === "true";
+
         const articles = await prisma.newsArticle.findMany({
-            orderBy: { createdAt: 'desc' },
+            where: {
+                deletedAt: showDeleted ? { not: null } : null
+            },
+            include: {
+                authorUser: {
+                    select: {
+                        name: true,
+                        username: true,
+                        image: true
+                    }
+                }
+            },
+            orderBy: {
+                deletedAt: showDeleted ? 'desc' : undefined,
+                createdAt: !showDeleted ? 'desc' : undefined
+            },
         });
 
-        return NextResponse.json(articles);
+        return NextResponse.json(articles, {
+            headers: {
+                'Cache-Control': 'no-store, max-age=0'
+            }
+        });
     } catch (error) {
+        console.error("Fetch Articles Error:", error);
         return NextResponse.json({ error: "Failed to fetch articles" }, { status: 500 });
     }
 }
@@ -29,7 +52,6 @@ export async function POST(request: Request) {
         }
 
         const data = await request.json();
-        console.log("Creating Article with data:", JSON.stringify(data, null, 2));
 
         // Simple slug generation
         const slug = data.title
@@ -44,13 +66,17 @@ export async function POST(request: Request) {
                 content: data.content,
                 excerpt: data.excerpt,
                 coverImage: data.coverImage,
+                bannerImage: data.bannerImage,
+                featuredImage: data.featuredImage,
                 category: data.category || "General",
+                tags: data.tags || [],
                 published: data.published || false,
                 publishedAt: data.published ? new Date() : null,
                 metaTitle: data.metaTitle,
                 metaDescription: data.metaDescription,
                 keywords: data.keywords,
-                author: session.user.name
+                author: session.user.name,
+                authorId: session.user.id
             }
         });
 

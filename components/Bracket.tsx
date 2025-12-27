@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaArrowLeft } from 'react-icons/fa';
 
 interface BracketSlot {
     entrant?: {
@@ -48,6 +49,12 @@ export default function Bracket({ sets, bracketType }: BracketProps) {
         // Group by round
         const setsByRound: Record<number, BracketSet[]> = {};
         bracketSets.forEach(set => {
+            const roundLabel = set.fullRoundText.toLowerCase();
+            // Filter out Losers Round 3 as per user request
+            if (roundLabel.includes('losers round 3') || (set.round === -3)) {
+                return;
+            }
+
             const round = Math.abs(set.round);
             if (!setsByRound[round]) setsByRound[round] = [];
             setsByRound[round].push(set);
@@ -56,36 +63,38 @@ export default function Bracket({ sets, bracketType }: BracketProps) {
         const rounds = Object.keys(setsByRound).map(Number).sort((a, b) => a - b);
 
         return (
-            <div className="mb-8">
-                <h3 className="text-lg md:text-xl font-bold mb-4 text-gray-300">{title}</h3>
-                <div className="grid gap-4" style={{
-                    gridTemplateColumns: `repeat(${rounds.length}, minmax(200px, 1fr))`
-                }}>
+            <div className="mb-12 last:mb-0">
+                <h3 className="text-xl font-black mb-8 text-white/40 uppercase tracking-[0.2em] flex items-center gap-4">
+                    <span className="w-8 h-px bg-white/10"></span>
+                    {title}
+                </h3>
+                <div
+                    className="flex lg:grid gap-6 pb-6 overflow-x-auto lg:overflow-visible no-scrollbar"
+                    style={{
+                        gridTemplateColumns: `repeat(${rounds.length}, minmax(180px, 1fr))`
+                    }}
+                >
                     {rounds.map((round, roundIndex) => {
                         const roundSets = setsByRound[round];
                         const roundLabel = roundSets[0]?.fullRoundText || `Round ${round}`;
 
                         // Determine round importance for coloring
-                        const isFinals = roundIndex === rounds.length - 1;
-                        const isSemis = roundIndex === rounds.length - 2;
-
-                        // Check for bracket reset (Grand Finals with 2+ matches)
+                        const isFinals = roundLabel.toLowerCase().includes('grand final') || roundLabel.toLowerCase().includes('final');
                         const isGrandFinals = roundLabel.toLowerCase().includes('grand final');
                         const hasBracketReset = isGrandFinals && roundSets.length > 1;
 
                         return (
-                            <div key={round} className="flex flex-col min-w-0">
+                            <div key={round} className="flex flex-col min-w-[180px] lg:min-w-0">
                                 {/* Round Header */}
-                                <div className="mb-3 text-center">
-                                    <div className="inline-block bg-gray-700 px-2 md:px-4 py-1 md:py-2 rounded text-xs md:text-sm font-semibold text-gray-300 truncate max-w-full">
+                                <div className="mb-6 text-center">
+                                    <div className="inline-block bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">
                                         {roundLabel}
                                     </div>
                                 </div>
 
                                 {/* Matches */}
                                 {hasBracketReset ? (
-                                    // Special layout for bracket reset
-                                    <div className="flex flex-col gap-2 items-center">
+                                    <div className="flex flex-col gap-4 items-center">
                                         {roundSets.map((set, setIndex) => {
                                             const team1 = set.slots[0];
                                             const team2 = set.slots[1];
@@ -95,43 +104,26 @@ export default function Bracket({ sets, bracketType }: BracketProps) {
                                             const score2 = team2?.standing?.stats?.score?.value ?? '';
 
                                             return (
-                                                <div key={set.id} className="w-full">
-                                                    {/* Match Label */}
-                                                    <div className="text-center mb-1">
-                                                        <span className="text-xs text-gray-500 font-semibold">
-                                                            {setIndex === 0 ? 'Set 1' : 'Set 2 (Reset)'}
+                                                <div key={set.id} className="w-full space-y-2">
+                                                    <div className="text-center">
+                                                        <span className="text-[10px] text-pink-500 font-black uppercase tracking-tighter">
+                                                            {setIndex === 0 ? 'Championship Set' : 'Bracket Reset'}
                                                         </span>
                                                     </div>
 
-                                                    {/* Match Card - Horizontal Layout */}
-                                                    <div className="bg-gray-800/50 rounded border border-gray-700 overflow-hidden flex">
-                                                        {/* Team 1 */}
-                                                        <div className={`flex-1 flex items-center justify-between px-2 md:px-3 py-2 ${winner1 ? 'bg-yellow-500/20 border-l-4 border-l-yellow-500' : ''
-                                                            }`}>
-                                                            <span className={`text-xs md:text-sm font-medium truncate ${winner1 ? 'text-yellow-300' : 'text-gray-400'
-                                                                }`}>
+                                                    <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+                                                        <div className={`flex items-center justify-between px-4 py-3 ${winner1 ? 'bg-pink-500/10 border-l-4 border-l-pink-500' : ''}`}>
+                                                            <span className={`text-xs font-bold uppercase truncate ${winner1 ? 'text-white' : 'text-gray-500'}`}>
                                                                 {team1?.entrant?.name || 'TBD'}
                                                             </span>
-                                                            <span className={`ml-2 text-sm md:text-base font-bold flex-shrink-0 ${winner1 ? 'text-yellow-400' : 'text-gray-500'
-                                                                }`}>
-                                                                {score1}
-                                                            </span>
+                                                            <span className={`text-xs font-black ${winner1 ? 'text-pink-500' : 'text-gray-700'}`}>{score1}</span>
                                                         </div>
-
-                                                        {/* vs Divider */}
-                                                        <div className="w-px bg-gray-700"></div>
-
-                                                        {/* Team 2 */}
-                                                        <div className={`flex-1 flex items-center justify-between px-2 md:px-3 py-2 ${winner2 ? 'bg-yellow-500/20 border-r-4 border-r-yellow-500' : ''
-                                                            }`}>
-                                                            <span className={`text-xs md:text-sm font-medium truncate ${winner2 ? 'text-yellow-300' : 'text-gray-400'
-                                                                }`}>
+                                                        <div className="h-px bg-white/5"></div>
+                                                        <div className={`flex items-center justify-between px-4 py-3 ${winner2 ? 'bg-pink-500/10 border-l-4 border-l-pink-500' : ''}`}>
+                                                            <span className={`text-xs font-bold uppercase truncate ${winner2 ? 'text-white' : 'text-gray-500'}`}>
                                                                 {team2?.entrant?.name || 'TBD'}
                                                             </span>
-                                                            <span className={`ml-2 text-sm md:text-base font-bold flex-shrink-0 ${winner2 ? 'text-yellow-400' : 'text-gray-500'
-                                                                }`}>
-                                                                {score2}
-                                                            </span>
+                                                            <span className={`text-xs font-black ${winner2 ? 'text-pink-500' : 'text-gray-700'}`}>{score2}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -139,8 +131,7 @@ export default function Bracket({ sets, bracketType }: BracketProps) {
                                         })}
                                     </div>
                                 ) : (
-                                    // Normal vertical layout
-                                    <div className="flex flex-col justify-around flex-1 gap-4 md:gap-6">
+                                    <div className="flex flex-col justify-around flex-1 gap-6">
                                         {roundSets.map((set) => {
                                             const team1 = set.slots[0];
                                             const team2 = set.slots[1];
@@ -149,64 +140,32 @@ export default function Bracket({ sets, bracketType }: BracketProps) {
                                             const score1 = team1?.standing?.stats?.score?.value ?? '';
                                             const score2 = team2?.standing?.stats?.score?.value ?? '';
 
-                                            // Color scheme based on round
                                             const getWinnerColors = (isWinner: boolean) => {
-                                                if (!isWinner) return {
-                                                    bg: '',
-                                                    text: 'text-gray-400',
-                                                    score: 'text-gray-500'
+                                                if (!isWinner) return { bg: '', text: 'text-gray-500', score: 'text-gray-700' };
+                                                return {
+                                                    bg: 'bg-pink-500/10 border-l-4 border-l-pink-500',
+                                                    text: 'text-white font-bold',
+                                                    score: 'text-pink-500 font-black'
                                                 };
-
-                                                if (isFinals) {
-                                                    // Finals winner = Champion (Gold)
-                                                    return {
-                                                        bg: 'bg-yellow-500/20 border-l-4 border-l-yellow-500',
-                                                        text: 'text-yellow-300',
-                                                        score: 'text-yellow-400'
-                                                    };
-                                                } else if (isSemis) {
-                                                    // Semis winner = 2nd/3rd place (Silver)
-                                                    return {
-                                                        bg: 'bg-gray-400/20 border-l-4 border-l-gray-400',
-                                                        text: 'text-gray-200',
-                                                        score: 'text-gray-300'
-                                                    };
-                                                } else {
-                                                    // Other winners (Green)
-                                                    return {
-                                                        bg: 'bg-green-500/20 border-l-4 border-l-green-500',
-                                                        text: 'text-green-300',
-                                                        score: 'text-green-400'
-                                                    };
-                                                }
                                             };
 
-                                            const team1Colors = getWinnerColors(winner1);
-                                            const team2Colors = getWinnerColors(winner2);
+                                            const t1c = getWinnerColors(winner1);
+                                            const t2c = getWinnerColors(winner2);
 
                                             return (
-                                                <div key={set.id} className="bg-gray-800/50 rounded border border-gray-700 overflow-hidden min-w-0">
-                                                    {/* Team 1 */}
-                                                    <div className={`flex items-center justify-between px-2 md:px-3 py-1.5 md:py-2 ${team1Colors.bg}`}>
-                                                        <span className={`text-xs md:text-sm font-medium truncate ${team1Colors.text}`}>
+                                                <div key={set.id} className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden shadow-xl hover:border-pink-500/30 transition-all group">
+                                                    <div className={`flex items-center justify-between px-4 py-3 ${t1c.bg}`}>
+                                                        <span className={`text-[10px] md:text-sm uppercase tracking-tight truncate ${t1c.text}`}>
                                                             {team1?.entrant?.name || 'TBD'}
                                                         </span>
-                                                        <span className={`ml-2 text-xs md:text-sm font-bold flex-shrink-0 ${team1Colors.score}`}>
-                                                            {score1}
-                                                        </span>
+                                                        <span className={`text-sm ${t1c.score}`}>{score1}</span>
                                                     </div>
-
-                                                    {/* Divider */}
-                                                    <div className="h-px bg-gray-700"></div>
-
-                                                    {/* Team 2 */}
-                                                    <div className={`flex items-center justify-between px-2 md:px-3 py-1.5 md:py-2 ${team2Colors.bg}`}>
-                                                        <span className={`text-xs md:text-sm font-medium truncate ${team2Colors.text}`}>
+                                                    <div className="h-px bg-white/5"></div>
+                                                    <div className={`flex items-center justify-between px-4 py-3 ${t2c.bg}`}>
+                                                        <span className={`text-[10px] md:text-sm uppercase tracking-tight truncate ${t2c.text}`}>
                                                             {team2?.entrant?.name || 'TBD'}
                                                         </span>
-                                                        <span className={`ml-2 text-xs md:text-sm font-bold flex-shrink-0 ${team2Colors.score}`}>
-                                                            {score2}
-                                                        </span>
+                                                        <span className={`text-sm ${t2c.score}`}>{score2}</span>
                                                     </div>
                                                 </div>
                                             );
@@ -222,22 +181,26 @@ export default function Bracket({ sets, bracketType }: BracketProps) {
     };
 
     return (
-        <div className="bg-black/40 p-4 md:p-6 rounded-lg">
-            {/* Mobile scroll hint */}
-            <div className="md:hidden text-xs text-gray-500 mb-3 flex items-center gap-2">
-                <span>👉</span>
-                <span>Scroll horizontally to view all rounds</span>
+        <div className="bg-[#050505] p-6 lg:p-10 rounded-[3rem] border border-white/5 shadow-3xl">
+            {/* Scroll indicators for desktop grid vs mobile scroll */}
+            <div className="flex justify-between items-center mb-10">
+                <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-pink-500 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.5)]"></div>
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Live Integration</span>
+                </div>
+                <div className="lg:hidden flex items-center gap-2 text-[10px] font-black text-pink-500 uppercase tracking-widest animate-pulse">
+                    Swipe Right <FaArrowLeft className="rotate-180" />
+                </div>
             </div>
 
-            {/* Scrollable bracket container */}
-            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="no-scrollbar">
                 {isDoubleElim ? (
-                    <>
-                        {renderBracket(upperBracket, 'Upper Bracket')}
-                        {renderBracket(lowerBracket, 'Lower Bracket')}
-                    </>
+                    <div className="space-y-20">
+                        {renderBracket(upperBracket, 'Championship Path')}
+                        {renderBracket(lowerBracket, 'Redemption Bracket')}
+                    </div>
                 ) : (
-                    renderBracket(upperBracket, 'Tournament Bracket')
+                    renderBracket(upperBracket, 'Tournament Path')
                 )}
             </div>
         </div>

@@ -38,7 +38,7 @@ export default function OrdersPage() {
                 </p>
                 <button
                     onClick={() => router.push("/store")}
-                    className="px-8 py-3 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-lg transition-colors"
+                    className="px-8 py-3 bg-pink-600 hover:bg-pink-500 hover:text-black text-white font-bold rounded-lg transition-colors"
                 >
                     Visit Store
                 </button>

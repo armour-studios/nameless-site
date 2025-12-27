@@ -67,7 +67,7 @@ const html = template
   .replace('{{HIGHLIGHT_LABEL}}', 'Tournament Date')
   .replace('{{HIGHLIGHT_VALUE}}', 'JAN 15')
   .replace('{{CTA_TEXT}}', 'Register Team')
-  .replace('{{CTA_URL}}', 'https://namelessesports.com/events/winter-championship')
+  .replace('{{CTA_URL}}', 'https://namelessesports.com/esports/events/winter-championship')
   .replace('{{SECONDARY_MESSAGE}}', 'Limited spots available - First come, first served!')
   .replace('{{UNSUBSCRIBE_URL}}', '#');
 ```

@@ -19,7 +19,7 @@ export default function Card({ children, className, title, gradient = false, cen
                     "absolute -top-3 bg-[#0a0014] px-3 py-1 rounded border border-[var(--border)] z-20",
                     centerTitle ? "left-1/2 -translate-x-1/2" : "left-6"
                 )}>
-                    <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-secondary uppercase tracking-wider">
                         {title}
                     </span>
                 </div>

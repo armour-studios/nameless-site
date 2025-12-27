@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Card from '@/components/Card';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import PageTitle from './PageTitle';
 
 interface YouTubeVideo {
   id: string;
@@ -12,6 +13,10 @@ interface YouTubeVideo {
   publishedAt: string;
   channelTitle: string;
   videoUrl: string;
+}
+
+interface YouTubeFeedProps {
+  centered?: boolean;
 }
 
 const containerVariants = {
@@ -35,7 +40,7 @@ const itemVariants = {
   }
 };
 
-export default function YouTubeFeed() {
+export default function YouTubeFeed({ centered }: YouTubeFeedProps) {
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +50,7 @@ export default function YouTubeFeed() {
         const response = await fetch('/api/youtube-feed');
         if (response.ok) {
           const data = await response.json();
-          setVideos(data.videos.slice(0, 3) || []);
+          setVideos(data.videos.slice(0, 6) || []);
         }
       } catch (error) {
         console.error('Failed to fetch YouTube videos:', error);
@@ -62,22 +67,26 @@ export default function YouTubeFeed() {
   }
 
   return (
-    <div className="mb-20">
-      <div className="flex items-center justify-between mb-10">
-        <h2 className="text-3xl md:text-5xl font-black font-[family-name:var(--font-heading)] text-white">
-          LATEST <span className="text-gradient">BROADCASTS</span>
-        </h2>
-        <Link href="/services" className="text-pink-500 font-bold hover:text-white transition-colors flex items-center gap-2 group">
+    <div className="space-y-10 pt-12 border-t border-white/5">
+      <div className={centered ? "flex flex-col items-center" : "flex items-center justify-between"}>
+        <PageTitle
+          title="LATEST"
+          highlight="BROADCASTS"
+          description=""
+          centered={centered}
+          className="!mb-0"
+        />
+        <Link href="/services" className={`${centered ? "mt-4" : ""} text-pink-500 font-bold hover:text-white transition-colors flex items-center gap-2 group text-sm uppercase tracking-widest`}>
           View All <span className="group-hover:translate-x-1 transition-transform">→</span>
         </Link>
       </div>
-      
+
       <motion.div
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-8"
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
         {videos.map((video) => (
           <motion.a
@@ -86,32 +95,31 @@ export default function YouTubeFeed() {
             target="_blank"
             rel="noopener noreferrer"
             variants={itemVariants}
+            className="group"
           >
-            <Card className="overflow-hidden p-0 border-white/5 hover:border-purple-500/50 transition-all h-full flex flex-col group">
-              <div className="relative w-full pt-[56.25%] overflow-hidden bg-black/50">
+            <div className="bg-white/[0.02] border border-white/5 rounded-3xl overflow-hidden hover:border-pink-500/30 transition-all flex flex-col h-full shadow-2xl">
+              <div className="relative aspect-video overflow-hidden">
                 <img
                   src={video.thumbnail}
                   alt={video.title}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-purple-500/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-2xl text-white ml-1">▶</span>
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-full bg-pink-500 flex items-center justify-center shadow-2xl transform scale-75 group-hover:scale-100 transition-transform">
+                    <span className="text-white text-xl ml-1">▶</span>
                   </div>
                 </div>
               </div>
               <div className="p-6 flex flex-col flex-1">
-                <h3 className="text-xl font-bold mb-3 group-hover:text-purple-400 transition-colors text-white leading-tight line-clamp-2">
+                <h3 className="text-lg font-bold text-white leading-tight line-clamp-2 group-hover:text-pink-500 transition-colors mb-4">
                   {video.title}
                 </h3>
-                <p className="text-gray-400 text-sm mb-6">
-                  {video.channelTitle}
-                </p>
-                <div className="mt-auto text-gray-500 text-xs font-bold flex items-center gap-1">
-                  {new Date(video.publishedAt).toLocaleDateString()}
+                <div className="mt-auto pt-4 flex justify-between items-center border-t border-white/5">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{video.channelTitle}</span>
+                  <span className="text-[10px] font-bold text-white/20">{new Date(video.publishedAt).toLocaleDateString()}</span>
                 </div>
               </div>
-            </Card>
+            </div>
           </motion.a>
         ))}
       </motion.div>

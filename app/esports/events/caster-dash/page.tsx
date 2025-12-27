@@ -146,12 +146,6 @@ export default function CasterDashboard() {
         return true;
     });
 
-    // DEBUG: Log filter state and results
-    console.log('Caster Dashboard - Filters:', filters);
-    console.log('Caster Dashboard - Total tournaments:', tournaments.length);
-    console.log('Caster Dashboard - Filtered tournaments:', filteredTournaments.length);
-
-
     // Process team statistics - FIXED to count ALL teams across ALL events from FILTERED data
     const teamStats = new Map<string, TeamStats>();
     const totalEventsCount = filteredTournaments.reduce((sum, t) => sum + (t.events?.length || 0), 0);

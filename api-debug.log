@@ -1,0 +1,8 @@
+[2025-12-26T21:28:42.098Z] DELETE request for article ID: cmjndvvyy0003ix58fxi6n1cz
+[2025-12-26T21:28:42.106Z] Session user: jonzey.esports@gmail.com, Role: admin
+[2025-12-26T21:28:42.191Z] Delete result count: 1
+[2025-12-26T21:28:42.191Z] Successfully deleted article: cmjndvvyy0003ix58fxi6n1cz
+[2025-12-27T00:41:29.447Z] DELETE request for article ID: cmjnkrs2m0001ixbk7m28s3gt
+[2025-12-27T00:41:29.600Z] Soft deleted article: cmjnkrs2m0001ixbk7m28s3gt
+[2025-12-27T00:41:34.358Z] PERMANENT DELETE request for article ID: cmjnkrs2m0001ixbk7m28s3gt
+[2025-12-27T00:41:34.435Z] Permanently deleted article: cmjnkrs2m0001ixbk7m28s3gt

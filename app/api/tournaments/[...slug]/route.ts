@@ -25,6 +25,7 @@ export async function GET(
         endAt
         numAttendees
         state
+        rules
         images {
           url
           type
@@ -35,6 +36,8 @@ export async function GET(
           slug
           numEntrants
           state
+          rulesMarkdown
+          prizingInfo
           videogame {
             name
             displayName
@@ -51,9 +54,12 @@ export async function GET(
                   nodes {
                     id
                     round
+                    state
                     fullRoundText
+                    displayScore
                     slots {
                       entrant {
+                        id
                         name
                       }
                       standing {

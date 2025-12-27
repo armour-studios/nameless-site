@@ -6,6 +6,8 @@ export interface NewsArticle {
     link: string;
     date: string;
     author: string;
+    authorUsername?: string;
+    authorImage?: string;
     image: string;
     source: string;
     category: 'Business' | 'Rocket League' | 'General' | 'Coaching' | 'Scholarships';
@@ -16,26 +18,6 @@ const FEED_SOURCES = [
         name: 'Esports Insider',
         url: 'https://esportsinsider.com/feed',
         category: 'Business' as const
-    },
-    {
-        name: 'Rocket League Esports',
-        url: 'https://www.reddit.com/r/RocketLeagueEsports/.rss',
-        category: 'Rocket League' as const
-    },
-    {
-        name: 'The Esports Advocate',
-        url: 'https://esportsadvocate.net/feed/',
-        category: 'Business' as const
-    },
-    {
-        name: 'Coaching Essentials',
-        url: 'https://rss.com/podcasts/esportscoachingessentials/feed/',
-        category: 'Coaching' as const
-    },
-    {
-        name: 'The Esports Report',
-        url: 'https://rss.com/podcasts/theesportsreport/feed/',
-        category: 'Coaching' as const
     }
 ];
 
@@ -156,6 +138,7 @@ export async function getAllNews(): Promise<NewsArticle[]> {
         // Fetch from Database
         const dbNewsPromise = prisma.newsArticle.findMany({
             where: { published: true },
+            include: { authorUser: true },
             orderBy: { publishedAt: 'desc' }
         }).then(articles => articles.map(article => ({
             id: article.id,
@@ -164,7 +147,9 @@ export async function getAllNews(): Promise<NewsArticle[]> {
             content: article.content,
             link: `/news/${article.slug}`, // Internal link
             date: article.publishedAt ? article.publishedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
-            author: article.author || "Nameless Staff",
+            author: article.author || article.authorUser?.name || article.authorUser?.username || "Nameless Staff",
+            authorUsername: article.authorUser?.username,
+            authorImage: article.authorUser?.image,
             image: article.coverImage || "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80",
             source: "Nameless Esports",
             category: (article as any).category || "General"

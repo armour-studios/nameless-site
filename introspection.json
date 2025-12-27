@@ -1,0 +1,171 @@
+{
+  "data": {
+    "__type": {
+      "name": "Team",
+      "fields": [
+        {
+          "name": "id",
+          "type": {
+            "name": "ID",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "discriminator",
+          "type": {
+            "name": "String",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "images",
+          "type": {
+            "name": null,
+            "kind": "LIST",
+            "ofType": {
+              "name": "Image",
+              "kind": "OBJECT",
+              "fields": [
+                {
+                  "name": "id",
+                  "type": {
+                    "name": "ID",
+                    "kind": "SCALAR",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "height",
+                  "type": {
+                    "name": "Float",
+                    "kind": "SCALAR",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "ratio",
+                  "type": {
+                    "name": "Float",
+                    "kind": "SCALAR",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "type",
+                  "type": {
+                    "name": "String",
+                    "kind": "SCALAR",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "url",
+                  "type": {
+                    "name": "String",
+                    "kind": "SCALAR",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "width",
+                  "type": {
+                    "name": "Float",
+                    "kind": "SCALAR",
+                    "ofType": null
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "members",
+          "type": {
+            "name": null,
+            "kind": "LIST",
+            "ofType": {
+              "name": "TeamMember",
+              "kind": "OBJECT",
+              "fields": [
+                {
+                  "name": "id",
+                  "type": {
+                    "name": "ID",
+                    "kind": "SCALAR",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "isAlternate",
+                  "type": {
+                    "name": "Boolean",
+                    "kind": "SCALAR",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "isCaptain",
+                  "type": {
+                    "name": "Boolean",
+                    "kind": "SCALAR",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "memberType",
+                  "type": {
+                    "name": "TeamMemberType",
+                    "kind": "ENUM",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "participant",
+                  "type": {
+                    "name": "Participant",
+                    "kind": "OBJECT",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "player",
+                  "type": {
+                    "name": "Player",
+                    "kind": "OBJECT",
+                    "ofType": null
+                  }
+                },
+                {
+                  "name": "status",
+                  "type": {
+                    "name": "TeamMemberStatus",
+                    "kind": "ENUM",
+                    "ofType": null
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "name",
+          "type": {
+            "name": "String",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        }
+      ]
+    }
+  },
+  "extensions": {
+    "cacheControl": {
+      "version": 1,
+      "hints": null
+    },
+    "queryComplexity": 0
+  },
+  "actionRecords": []
+}

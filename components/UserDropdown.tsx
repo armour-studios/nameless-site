@@ -14,7 +14,9 @@ import {
     FaUsers,
     FaMedal,
     FaChevronDown,
-    FaTrash
+    FaTrash,
+    FaTrophy,
+    FaChartLine
 } from "react-icons/fa";
 import Image from "next/image";
 
@@ -67,7 +69,7 @@ export default function UserDropdown() {
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-3 focus:outline-none group"
             >
-                <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-transparent group-hover:border-pink-500 transition-all">
+                <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-all">
                     <Image
                         src={user.image || "/placeholder-user.jpg"}
                         alt={user.name || "User"}
@@ -76,7 +78,7 @@ export default function UserDropdown() {
                     />
                 </div>
                 <div className="hidden md:block text-left">
-                    <div className="text-sm font-bold text-white group-hover:text-pink-400 transition-colors flex items-center gap-2">
+                    <div className="text-sm font-bold text-white group-hover:text-primary transition-colors flex items-center gap-2">
                         {user.name}
                         <FaChevronDown className={`text-xs transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                     </div>
@@ -109,18 +111,25 @@ export default function UserDropdown() {
                                     <FaUser className="text-gray-400" /> View Profile
                                 </Link>
                                 <Link
+                                    href="/esports"
+                                    onClick={() => setIsOpen(false)}
+                                    className="flex items-center gap-3 px-3 py-2 text-pink-500 hover:text-pink-400 hover:bg-pink-500/5 rounded-lg transition-colors text-sm font-bold"
+                                >
+                                    <FaTrophy className="text-pink-500" /> Esports HQ
+                                </Link>
+                                <Link
                                     href="/dashboard"
                                     onClick={() => setIsOpen(false)}
                                     className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors text-sm font-medium"
                                 >
-                                    <FaUser className="text-gray-400" /> Dashboard
+                                    <FaChartLine className="text-gray-400" /> Dashboard
                                 </Link>
 
                                 {canAccessAdmin && (
                                     <Link
                                         href="/admin"
                                         onClick={() => setIsOpen(false)}
-                                        className="flex items-center gap-3 px-3 py-2 text-pink-400 hover:text-pink-300 hover:bg-pink-500/10 rounded-lg transition-colors text-sm font-medium"
+                                        className="flex items-center gap-3 px-3 py-2 text-primary hover:brightness-110 hover:bg-primary/10 rounded-lg transition-colors text-sm font-medium"
                                     >
                                         <FaShieldAlt /> {user.role === 'staff' ? 'Staff Dashboard' : 'Admin Dashboard'}
                                     </Link>
@@ -158,7 +167,7 @@ export default function UserDropdown() {
 
                             <div className="px-2 space-y-1">
                                 <Link
-                                    href="/teams"
+                                    href="/dashboard/teams"
                                     onClick={() => setIsOpen(false)}
                                     className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors text-sm font-medium"
                                 >
@@ -218,7 +227,7 @@ export default function UserDropdown() {
                                 </div>
                             </div>
                             <div className="p-6 border-t border-white/10 bg-[#1a1a1a] flex justify-end gap-3">
-                                <button 
+                                <button
                                     onClick={() => setIsDeleteModalOpen(false)}
                                     className="px-6 py-2 text-sm font-bold text-gray-400 hover:text-white transition-colors uppercase"
                                 >

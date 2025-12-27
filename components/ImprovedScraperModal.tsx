@@ -351,7 +351,7 @@ export function ImprovedScraperModal({ isOpen, onClose, onResults, activeJob, on
                                 <button
                                     onClick={handleUrlScrape}
                                     disabled={isProcessing || !urlInput.trim()}
-                                    className="px-8 py-2 bg-pink-600 hover:bg-pink-500 disabled:bg-pink-500/30 text-white text-xs font-bold uppercase rounded-lg transition-all"
+                                    className="px-8 py-2 bg-pink-600 hover:bg-pink-500 hover:text-black disabled:bg-pink-500/30 text-white text-xs font-bold uppercase rounded-lg transition-all"
                                 >
                                     {isProcessing ? 'Scraping...' : 'Run Scraper'}
                                 </button>
@@ -361,7 +361,7 @@ export function ImprovedScraperModal({ isOpen, onClose, onResults, activeJob, on
                                 <button
                                     onClick={handleAiScrape}
                                     disabled={isProcessing || !aiPrompt.trim()}
-                                    className="px-8 py-2 bg-pink-600 hover:bg-pink-500 disabled:bg-pink-500/30 text-white text-xs font-bold uppercase rounded-lg transition-all"
+                                    className="px-8 py-2 bg-pink-600 hover:bg-pink-500 hover:text-black disabled:bg-pink-500/30 text-white text-xs font-bold uppercase rounded-lg transition-all"
                                 >
                                     {isProcessing ? 'Searching...' : 'Search'}
                                 </button>

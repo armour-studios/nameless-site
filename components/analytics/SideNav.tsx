@@ -6,11 +6,14 @@ import { usePathname } from "next/navigation";
 export default function SideNav() {
     const pathname = usePathname();
 
+    const isEsports = pathname.startsWith('/esports');
+    const prefix = '/esports/events';
+
     const navLinks = [
-        { href: "/events/analytics", label: "Analytics Overview" },
-        { href: "/events/caster-dash", label: "Caster Dashboard" },
-        { href: "/events/team-analysis", label: "Team Analysis" },
-        { href: "/events/player-analytics", label: "Player Analytics" },
+        { href: `${prefix}/analytics`, label: "Analytics Overview" },
+        { href: `${prefix}/caster-dash`, label: "Caster Dashboard" },
+        { href: `${prefix}/team-analysis`, label: "Team Analysis" },
+        { href: `${prefix}/player-analytics`, label: "Player Analytics" },
     ];
 
     return (
@@ -24,8 +27,8 @@ export default function SideNav() {
                             key={link.href}
                             href={link.href}
                             className={`block px-4 py-3 rounded-lg font-medium transition-all ${isActive
-                                    ? 'bg-pink-500 text-white'
-                                    : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                                ? 'bg-pink-500 text-white hover:text-black'
+                                : 'text-gray-300 hover:bg-white/10 hover:text-white'
                                 }`}
                         >
                             {link.label}

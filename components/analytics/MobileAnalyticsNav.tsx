@@ -14,11 +14,14 @@ export default function MobileAnalyticsNav({ onLiveFeedToggle, showLiveFeed }: M
     const [showMenu, setShowMenu] = useState(false);
     const pathname = usePathname();
 
+    const isEsports = pathname.startsWith('/esports');
+    const prefix = '/esports/events';
+
     const navLinks = [
-        { href: "/events/analytics", label: "Analytics Overview" },
-        { href: "/events/caster-dash", label: "Caster Dashboard" },
-        { href: "/events/team-analysis", label: "Team Analysis" },
-        { href: "/events/player-analytics", label: "Player Analytics" },
+        { href: `${prefix}/analytics`, label: "Analytics Overview" },
+        { href: `${prefix}/caster-dash`, label: "Caster Dashboard" },
+        { href: `${prefix}/team-analysis`, label: "Team Analysis" },
+        { href: `${prefix}/player-analytics`, label: "Player Analytics" },
     ];
 
     const currentPage = navLinks.find(link => link.href === pathname)?.label || "Analytics";
@@ -45,7 +48,7 @@ export default function MobileAnalyticsNav({ onLiveFeedToggle, showLiveFeed }: M
                     {/* Live Feed Toggle */}
                     <button
                         onClick={onLiveFeedToggle}
-                        className={`p-2 rounded-lg transition-colors ${showLiveFeed ? 'bg-pink-500 text-white' : 'hover:bg-white/10 text-white'
+                        className={`p-2 rounded-lg transition-colors ${showLiveFeed ? 'bg-pink-500 text-white hover:text-black' : 'hover:bg-white/10 text-white'
                             }`}
                         aria-label="Toggle live feed"
                     >
@@ -87,8 +90,8 @@ export default function MobileAnalyticsNav({ onLiveFeedToggle, showLiveFeed }: M
                                             href={link.href}
                                             onClick={() => setShowMenu(false)}
                                             className={`block px-4 py-3 rounded-lg font-medium transition-all ${isActive
-                                                    ? 'bg-pink-500 text-white'
-                                                    : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                                                ? 'bg-pink-500 text-white hover:text-black'
+                                                : 'text-gray-300 hover:bg-white/10 hover:text-white'
                                                 }`}
                                         >
                                             {link.label}

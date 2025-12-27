@@ -98,37 +98,54 @@ export default async function News({ searchParams }: PageProps) {
                 {/* Main Content Column */}
                 <div className="lg:col-span-8 space-y-12">
                     {/* Featured Article - Centered Layout */}
-                    <Link href={featuredArticle.link} target="_blank" rel="noopener noreferrer" className="block outline-none group">
-                        <section className="relative h-[500px] md:h-[600px] rounded-[2.5rem] overflow-hidden group cursor-pointer border border-white/10">
-                            <img
-                                src={featuredArticle.image}
-                                alt={featuredArticle.title}
-                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-center items-center text-center p-8 md:p-16">
-                                <div className="max-w-4xl px-4 flex flex-col items-center">
-                                    <span className={`inline-block px-4 py-1.5 rounded-xl text-[10px] font-black mb-6 tracking-[0.2em] uppercase ${TAG_COLORS[featuredArticle.category.toUpperCase()] || 'bg-gray-500 text-white'}`}>
-                                        {featuredArticle.category}
-                                    </span>
-                                    <h2 className="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tight leading-tight line-clamp-3 drop-shadow-2xl group-hover:text-pink-400 transition-colors">
+                    <section className="relative h-[500px] md:h-[600px] rounded-[2.5rem] overflow-hidden group border border-white/10">
+                        <img
+                            src={featuredArticle.image}
+                            alt={featuredArticle.title}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent flex flex-col justify-center items-center text-center p-8 md:p-16">
+                            <div className="max-w-4xl px-4 flex flex-col items-center relative z-10">
+                                <span className={`inline-block px-4 py-1.5 rounded-xl text-[10px] font-black mb-6 tracking-[0.2em] uppercase ${TAG_COLORS[featuredArticle.category.toUpperCase()] || 'bg-gray-500 text-white'}`}>
+                                    {featuredArticle.category}
+                                </span>
+                                <Link href={featuredArticle.link} {...(featuredArticle.link.startsWith('/') ? {} : { target: "_blank", rel: "noopener noreferrer" })}>
+                                    <h2 className="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tight leading-tight line-clamp-3 drop-shadow-2xl hover:text-pink-400 transition-colors cursor-pointer">
                                         {featuredArticle.title}
                                     </h2>
-                                    <p className="text-gray-300 text-sm md:text-lg max-w-2xl mx-auto mb-8 line-clamp-2 md:opacity-70 font-medium leading-relaxed">
-                                        {featuredArticle.excerpt}
-                                    </p>
-                                    <div className="inline-flex items-center gap-3 text-white text-[10px] font-black uppercase tracking-[0.3em] border-b-2 border-pink-500 pb-1 group-hover:gap-5 transition-all">
+                                </Link>
+                                <p className="text-gray-300 text-sm md:text-lg max-w-2xl mx-auto mb-8 line-clamp-2 md:opacity-70 font-medium leading-relaxed">
+                                    {featuredArticle.excerpt}
+                                </p>
+                                <div className="flex flex-col items-center gap-6">
+                                    <Link href={featuredArticle.link} {...(featuredArticle.link.startsWith('/') ? {} : { target: "_blank", rel: "noopener noreferrer" })} className="inline-flex items-center gap-3 text-white text-[10px] font-black uppercase tracking-[0.3em] border-b-2 border-pink-500 pb-1 hover:gap-5 transition-all">
                                         Read Article <FaChevronRight size={10} />
-                                    </div>
+                                    </Link>
+
+                                    {(featuredArticle as any).authorUsername && (
+                                        <Link href={`/profile/${(featuredArticle as any).authorUsername}`} className="flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 transition-all">
+                                            <div className="w-6 h-6 rounded-full overflow-hidden border border-pink-500/30">
+                                                <img
+                                                    src={(featuredArticle as any).authorImage || `https://ui-avatars.com/api/?name=${(featuredArticle as any).author}&background=ec4899&color=fff`}
+                                                    alt=""
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                                                By <span className="text-white">{(featuredArticle as any).author}</span>
+                                            </span>
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
-                        </section>
-                    </Link>
+                        </div>
+                    </section>
 
                     {/* All Articles Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         {recentArticles.map((article) => (
-                            <a href={article.link} target="_blank" rel="noopener noreferrer" key={article.id} className="group flex flex-col gap-6">
-                                <div className="aspect-[16/10] relative overflow-hidden rounded-[2rem] bg-white/5 border border-white/5">
+                            <div key={article.id} className="group flex flex-col gap-6">
+                                <Link href={article.link} {...(article.link.startsWith('/') ? {} : { target: "_blank", rel: "noopener noreferrer" })} className="block aspect-[16/10] relative overflow-hidden rounded-[2rem] bg-white/5 border border-white/5">
                                     <img
                                         src={article.image}
                                         alt={article.title}
@@ -137,7 +154,7 @@ export default async function News({ searchParams }: PageProps) {
                                     <div className="absolute top-5 right-5 bg-black/80 backdrop-blur-xl px-4 py-1.5 rounded-xl text-[9px] font-bold text-white uppercase tracking-widest border border-white/10">
                                         {article.source}
                                     </div>
-                                </div>
+                                </Link>
                                 <div className="space-y-4 px-2">
                                     <div className="flex items-center gap-4 text-[9px] text-gray-500 font-bold uppercase tracking-[0.2em]">
                                         <span className={`font-black ${article.category.toUpperCase() === 'ROCKET LEAGUE' ? 'text-pink-500' : 'text-blue-400'}`}>{article.category}</span>
@@ -151,11 +168,23 @@ export default async function News({ searchParams }: PageProps) {
                                     <p className="text-gray-400 text-sm line-clamp-3 leading-relaxed opacity-60">
                                         {article.excerpt}
                                     </p>
-                                    <div className="pt-2">
-                                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest group-hover:text-pink-500 transition-colors">View Source →</span>
+                                    <div className="pt-2 flex items-center justify-between">
+                                        <Link href={article.link} {...(article.link.startsWith('/') ? {} : { target: "_blank", rel: "noopener noreferrer" })} className="text-[10px] font-black text-white/40 uppercase tracking-widest group-hover:text-pink-500 transition-colors">{article.link.startsWith('/') ? 'Read More →' : 'View Source →'}</Link>
+                                        {article.authorUsername && (
+                                            <Link href={`/profile/${article.authorUsername}`} className="flex items-center gap-2 group/author">
+                                                <div className="w-5 h-5 rounded-full overflow-hidden border border-white/10">
+                                                    <img
+                                                        src={article.authorImage || `https://ui-avatars.com/api/?name=${article.author}&background=ec4899&color=fff`}
+                                                        alt=""
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <span className="text-[10px] font-bold text-gray-400 group-hover/author:text-white transition-colors">{article.author}</span>
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
-                            </a>
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -170,7 +199,7 @@ export default async function News({ searchParams }: PageProps) {
                                 <p className="text-gray-300 text-sm mb-8 leading-relaxed font-medium">
                                     Bring professional esports to your school. Unlock scholarships, expert coaching, and exclusive competitive opportunities for your students.
                                 </p>
-                                <Link href="/initiative" className="inline-flex items-center gap-3 bg-pink-500 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-pink-600 transition-all shadow-xl shadow-pink-500/20 group-hover:scale-105">
+                                <Link href="/initiative" className="inline-flex items-center gap-3 bg-pink-500 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-pink-600 hover:text-black transition-all shadow-xl shadow-pink-500/20 group-hover:scale-105">
                                     Learn More
                                 </Link>
                             </div>

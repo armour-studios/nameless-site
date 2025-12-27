@@ -1,7 +1,8 @@
 "use client";
 
+import PageTitle from "@/components/PageTitle";
 import Card from "@/components/Card";
-import { FaGraduationCap, FaTrophy, FaUsers, FaCalendar, FaSchool, FaChartLine, FaCheckCircle, FaRocket, FaStar } from "react-icons/fa";
+import { FaGraduationCap, FaTrophy, FaUsers, FaCalendar, FaSchool, FaChartLine, FaCheckCircle, FaRocket, FaStar, FaShieldAlt } from "react-icons/fa";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -28,213 +29,209 @@ const itemVariants = {
 
 export default function Initiative() {
     return (
-        <main className="min-h-screen pb-20 px-4 md:px-8 max-w-[1400px] mx-auto">
+        <main className="min-h-screen pb-20 px-4 md:px-8 max-w-[1600px] mx-auto space-y-24">
             {/* Header */}
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-4 mb-12 pt-8"
-            >
-                <h1 className="text-4xl md:text-7xl font-[family-name:var(--font-heading)] font-black text-white uppercase tracking-tighter">
-                    NAMELESS <span className="text-gradient">INITIATIVE</span>
-                </h1>
-                <div className="h-[2px] flex-1 bg-gradient-to-r from-purple-500 to-transparent"></div>
-            </motion.div>
+            <PageTitle
+                title="NAMELESS"
+                highlight="INITIATIVE"
+                description="Our dedicated non-profit program bringing competitive esports structure and opportunities to high schools nationwide."
+            />
 
             {/* Hero Section */}
             <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8 }}
-                className="mb-16"
-            >
-                <Card className="relative overflow-hidden p-0 border-white/10 bg-[#0a1128]">
-                    <div className="grid grid-cols-1 lg:grid-cols-12">
-                        <div className="lg:col-span-7 p-8 md:p-12 z-10 flex flex-col justify-center">
-                            <div className="inline-block bg-purple-500/10 text-purple-400 text-xs font-black uppercase tracking-[0.3em] px-4 py-2 rounded-lg mb-6 border border-purple-500/20 w-fit">
-                                For Schools & Students
-                            </div>
-                            <h2 className="text-4xl md:text-6xl font-black mb-6 text-white font-[family-name:var(--font-heading)] leading-none">
-                                HIGH SCHOOL <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">ESPORTS LEAGUE</span>
-                            </h2>
-                            <p className="text-xl text-gray-300 mb-8 leading-relaxed max-w-2xl font-medium">
-                                The Nameless Initiative is our non-profit program dedicated to bringing competitive esports to high schools across the nation. We provide structure, support, and opportunities for students to compete, learn, and grow.
-                            </p>
-                            <div className="flex flex-wrap gap-4">
-                                <Link href="/initiative/packages" className="btn-primary px-10 py-4 text-lg">
-                                    Register Your School
-                                </Link>
-                                <Link href="/initiative/program-deck" className="btn-outline px-10 py-4 text-lg">
-                                    Program Deck
-                                </Link>
-                            </div>
-                        </div>
-                        <div className="lg:col-span-5 relative h-80 lg:h-auto overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#0a1128] via-transparent to-transparent z-10 hidden lg:block"></div>
-                            <img
-                                src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1000"
-                                alt="High School Esports"
-                                className="w-full h-full object-cover grayscale opacity-40"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <FaGraduationCap className="text-[12rem] text-purple-500/20" />
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-            </motion.div>
-
-            {/* Launching Soon Banner */}
-            <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="mb-20"
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="relative min-h-[600px] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl group"
             >
-                <Card className="bg-gradient-to-r from-purple-900/40 via-pink-900/40 to-purple-900/40 border-2 border-purple-500/50">
-                    <div className="text-center py-12">
-                        <div className="inline-block bg-purple-500/20 border border-purple-500 rounded-full px-6 py-3 mb-6">
-                            <span className="text-purple-300 font-bold text-lg uppercase tracking-wider">🚀 Launching Fall 2025</span>
-                        </div>
-                        <h2 className="text-3xl md:text-5xl font-black mb-4 text-white font-[family-name:var(--font-heading)]">
-                            Building Tomorrow's <span className="text-gradient">Champions</span>
-                        </h2>
-                        <p className="text-gray-300 text-lg max-w-3xl mx-auto mb-8">
-                            The Initiative League is currently in development. Be among the first schools to join when registration opens in early 2025.
-                        </p>
-                        <div className="flex flex-wrap gap-4 justify-center">
-                            <Link href="/initiative/program-deck" className="btn-primary px-8 py-3">
-                                View Program Deck
+                {/* BG Content */}
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2070"
+                        alt="High School Esports Hero"
+                        className="w-full h-full object-cover grayscale opacity-30 group-hover:scale-105 transition-transform duration-[2s]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent" />
+                </div>
+
+                {/* Left Content */}
+                <div className="relative z-10 h-full flex items-center p-8 md:p-20">
+                    <div className="max-w-3xl space-y-8">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="inline-flex items-center gap-3 bg-purple-500/10 backdrop-blur-md border border-purple-500/20 px-5 py-2 rounded-full"
+                        >
+                            <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+                            <span className="text-xs font-black uppercase tracking-[0.3em] text-purple-300">Non-Profit Excellence</span>
+                        </motion.div>
+
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="text-5xl md:text-8xl font-black text-white font-[family-name:var(--font-heading)] leading-[0.85] tracking-tighter"
+                        >
+                            THE FUTURE <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 uppercase">OF HS ESPORTS</span>
+                        </motion.h2>
+
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                            className="text-xl md:text-2xl text-white/60 leading-relaxed font-medium"
+                        >
+                            Providing the framework, tools, and professional support schools need to foster tomorrow's champions.
+                        </motion.p>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6 }}
+                            className="flex flex-wrap gap-6 pt-4"
+                        >
+                            <Link href="/initiative/packages" className="px-12 py-5 bg-white text-black hover:bg-purple-500 hover:text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] transition-all hover:scale-105 shadow-2xl">
+                                Join The League
                             </Link>
-                            <Link href="/contact" className="btn-outline px-8 py-3">
-                                Express Interest
+                            <Link href="/initiative/program-deck" className="px-12 py-5 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-[1.5rem] font-black uppercase tracking-[0.2em] transition-all hover:scale-105 backdrop-blur-md">
+                                Program Deck
                             </Link>
-                        </div>
+                        </motion.div>
                     </div>
-                </Card>
+                </div>
             </motion.div>
 
-            {/* Programs */}
+            {/* Content Sections */}
             <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                className="mb-20"
+                className="space-y-24"
             >
-                <h2 className="text-3xl font-black mb-10 text-white uppercase tracking-tight flex items-center gap-4">
-                    Active Leagues
-                    <div className="h-px w-24 bg-purple-500/50"></div>
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <motion.div variants={itemVariants}>
-                        <Card className="h-full border-white/5 hover:border-blue-500/40 transition-all flex flex-col items-center text-center p-8 group">
-                            <div className="text-4xl mb-6 text-blue-400 group-hover:scale-110 transition-transform">
-                                <FaRocket />
-                            </div>
-                            <h3 className="text-xl font-black mb-3 text-white uppercase tracking-wide">Rocket League</h3>
-                            <p className="text-gray-400 text-sm mb-6 flex-1">
-                                Premier 3v3 competition for high school teams. Fall and Spring seasons.
-                            </p>
-                            <span className="text-blue-400 text-xs font-bold uppercase tracking-widest bg-blue-500/10 px-3 py-1 rounded text-center">Fall 2026 - Spring 2027</span>
-                        </Card>
-                    </motion.div>
+                {/* Launches Jan 10th */}
+                <motion.div variants={itemVariants}>
+                    <div className="relative group overflow-hidden rounded-[2.5rem] bg-gradient-to-r from-purple-600/20 to-pink-600/20 border border-white/10 p-12 text-center">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[1px] bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
+                        <h3 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter mb-4">NATIONAL LEAGUE <span className="text-purple-500">LAUNCHING</span> FALL 2026</h3>
+                        <p className="text-white/60 text-lg font-medium max-w-2xl mx-auto mb-8">
+                            Join our nationwide network of schools. Compete in regional divisions for a spot in the National Championship.
+                        </p>
+                        <Link href="/initiative/packages" className="inline-flex items-center gap-3 text-white font-black uppercase tracking-widest text-sm group/btn">
+                            Get Registration Details <div className="w-8 h-[1px] bg-white/20 group-hover/btn:w-12 transition-all" />
+                        </Link>
+                    </div>
+                </motion.div>
 
-                    <motion.div variants={itemVariants}>
-                        <Card className="h-full border-white/5 hover:border-pink-500/40 transition-all flex flex-col items-center text-center p-8 group">
-                            <div className="text-4xl mb-6 text-pink-500 group-hover:scale-110 transition-transform">
-                                <FaTrophy />
-                            </div>
-                            <h3 className="text-xl font-black mb-3 text-white uppercase tracking-wide">Marvel Rivals</h3>
-                            <p className="text-gray-400 text-sm mb-6 flex-1">
-                                New 6v6 superhero shooter competition launching for all partner schools.
-                            </p>
-                            <span className="text-pink-400 text-xs font-bold uppercase tracking-widest bg-pink-500/10 px-3 py-1 rounded text-center">Fall 2026 - Spring 2027</span>
-                        </Card>
-                    </motion.div>
+                {/* Active Leagues Grid */}
+                <section className="space-y-12">
+                    <div className="flex items-center gap-6">
+                        <div className="w-12 h-12 rounded-2xl bg-pink-500/10 flex items-center justify-center border border-pink-500/20">
+                            <FaTrophy className="text-2xl text-pink-500" />
+                        </div>
+                        <h2 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter">ACTIVE <span className="text-pink-500">LEAGUES</span></h2>
+                    </div>
 
-                    <motion.div variants={itemVariants}>
-                        <Card className="h-full border-white/5 hover:border-yellow-500/40 transition-all flex flex-col items-center text-center p-8 group">
-                            <div className="text-4xl mb-6 text-yellow-500 group-hover:scale-110 transition-transform">
-                                <FaStar />
-                            </div>
-                            <h3 className="text-xl font-black mb-3 text-white uppercase tracking-wide">Smash Bros</h3>
-                            <p className="text-gray-400 text-sm mb-6 flex-1">
-                                Monthly solo and crew battle brackets with in-person regional finals.
-                            </p>
-                            <span className="text-yellow-400 text-xs font-bold uppercase tracking-widest bg-yellow-500/10 px-3 py-1 rounded text-center">Fall 2026 - Spring 2027</span>
-                        </Card>
-                    </motion.div>
-
-                    <motion.div variants={itemVariants}>
-                        <Card className="h-full border-white/5 hover:border-green-500/40 transition-all flex flex-col items-center text-center p-8 group">
-                            <div className="text-4xl mb-6 text-green-400 group-hover:scale-110 transition-transform">
-                                <FaGraduationCap />
-                            </div>
-                            <h3 className="text-xl font-black mb-3 text-white uppercase tracking-wide">Coaching</h3>
-                            <p className="text-gray-400 text-sm mb-6 flex-1">
-                                Expert-led development for school teams and individual student players.
-                            </p>
-                            <span className="text-green-400 text-xs font-bold uppercase tracking-widest bg-green-500/10 px-3 py-1 rounded text-center">Included</span>
-                        </Card>
-                    </motion.div>
-                </div>
-            </motion.div>
-
-            {/* How it Works / Path to Pro */}
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="mb-20"
-            >
-                <Card className="p-8 md:p-12 border-purple-500/20 bg-gradient-to-br from-[#0a0014] to-purple-900/10">
-                    <h2 className="text-3xl font-black mb-10 text-center uppercase tracking-tighter text-white font-[family-name:var(--font-heading)]">
-                        THE PATHWAY TO <span className="text-gradient">SUCCESS</span>
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
-                            { step: "01", title: "Join Discord", text: "Schools and students register through our hub." },
-                            { step: "02", title: "Get Structured", text: "We provide ruleset, tools, and dedicated admin support." },
-                            { step: "03", title: "Compete Local", text: "Compete in regional qualifiers and seasonal play." },
-                            { step: "04", title: "Rise Up", text: "Qualify for national championships and scholarships." },
-                        ].map((item, idx) => (
-                            <div key={idx} className="relative group text-center">
-                                <div className="text-6xl font-black text-white/5 absolute -top-8 left-1/2 -translate-x-1/2 select-none group-hover:text-purple-500/10 transition-colors">
-                                    {item.step}
-                                </div>
-                                <div className="z-10 relative">
-                                    <div className="w-12 h-12 bg-purple-500 flex items-center justify-center rounded-xl mx-auto mb-4 text-white font-bold shadow-lg">
-                                        <FaCheckCircle />
+                            { name: "Rocket League", status: "Active", icon: FaRocket, color: "text-blue-400" },
+                            { name: "Overwatch 2", status: "Active", icon: FaTrophy, color: "text-orange-400" },
+                            { name: "VALORANT", status: "Active", icon: FaStar, color: "text-red-500" },
+                            { name: "League of Legends", status: "Active", icon: FaGraduationCap, color: "text-blue-500" }
+                        ].map((league, i) => (
+                            <motion.div key={i} variants={itemVariants} className="group cursor-pointer">
+                                <div className="h-full bg-white/[0.03] border border-white/10 rounded-[2rem] p-8 flex flex-col items-center text-center hover:border-white/20 hover:bg-white/[0.05] transition-all">
+                                    <div className={`p-5 rounded-2xl bg-white/[0.05] mb-6 group-hover:scale-110 transition-transform ${league.color}`}>
+                                        <league.icon className="text-4xl" />
                                     </div>
-                                    <h4 className="font-bold text-white mb-2 uppercase tracking-wide">{item.title}</h4>
-                                    <p className="text-gray-400 text-xs">{item.text}</p>
+                                    <h3 className="text-xl font-black text-white mb-2 uppercase tracking-wide leading-tight">{league.name}</h3>
+                                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-green-500">{league.status}</span>
+                                    </div>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
-                </Card>
-            </motion.div>
+                </section>
 
-            {/* CTA */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-            >
-                <Card className="text-center bg-gradient-to-r from-[#0a0014] via-purple-900/10 to-[#0a0014] border-purple-500/30 overflow-hidden relative p-12">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
-                    <h2 className="text-4xl md:text-5xl font-black mb-6 text-white uppercase tracking-tighter font-[family-name:var(--font-heading)]">READY TO <span className="text-gradient">EVOLVE?</span></h2>
-                    <p className="text-gray-400 mb-10 max-w-2xl mx-auto text-lg leading-relaxed">
-                        Whether you're a student building your skills, or an administrator bringing esports to your school, we're here to provide the framework for excellence.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                        <Link href="/initiative/packages" className="btn-primary px-12 py-5 text-xl">
-                            Register School
-                        </Link>
-                        <button className="btn-outline px-12 py-5 text-xl font-bold">Contact Us</button>
+                {/* The Pathway Section */}
+                <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div className="space-y-8">
+                        <div className="inline-block px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
+                            Proven Framework
+                        </div>
+                        <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter leading-none">THE <span className="text-purple-500">PATHWAY</span></h2>
+                        <p className="text-xl text-white/60 font-medium leading-relaxed max-w-xl">
+                            We provide a clear, professional pathway for students to transition from recreational gaming to organized collegiate and professional esports.
+                        </p>
+
+                        <div className="space-y-4 pt-4">
+                            {[
+                                { title: "Structured Competition", desc: "Weekly matches and season-long standings." },
+                                { title: "Educational Resources", desc: "Workshops on mental health and digital citizenship." },
+                                { title: "Career Exposure", desc: "Interact with industry pros and college scouts." }
+                            ].map((path, i) => (
+                                <div key={i} className="flex gap-6 group">
+                                    <div className="mt-1 w-6 h-6 rounded-full border border-purple-500/30 flex items-center justify-center group-hover:bg-purple-500 transition-all font-black text-[10px] text-white">
+                                        {i + 1}
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h4 className="font-black text-white uppercase tracking-wider text-sm">{path.title}</h4>
+                                        <p className="text-white/40 text-sm">{path.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </Card>
+
+                    <div className="bg-white/[0.02] border border-white/10 rounded-[2.5rem] p-10 md:p-12 space-y-8 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                            <FaSchool className="text-9xl text-white" />
+                        </div>
+                        <h3 className="text-2xl font-black text-white uppercase tracking-wider flex items-center gap-3">
+                            <span className="w-2 h-2 rounded-full bg-purple-500" /> For Administrators
+                        </h3>
+                        <ul className="space-y-6">
+                            {[
+                                "Complete turnkey league operations",
+                                "Zero-tolerance toxicity monitoring",
+                                "Academic eligibility tracking",
+                                "Supportive coach/teacner community",
+                                "Parent consultation resources"
+                            ].map((item, i) => (
+                                <li key={i} className="flex items-start gap-4 group">
+                                    <div className="mt-1.5 w-5 h-5 rounded-full border border-purple-500/30 flex items-center justify-center group-hover:bg-purple-500/20 transition-all">
+                                        <FaCheckCircle className="text-[10px] text-purple-500 opacity-0 group-hover:opacity-100 transition-all" />
+                                    </div>
+                                    <span className="text-lg text-white/70 group-hover:text-white transition-colors">{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </section>
+
+                {/* CTA / Final Banner */}
+                <motion.div variants={itemVariants} className="pt-12">
+                    <div className="bg-gradient-to-br from-[#1a0a2e] to-[#0a0014] border border-white/10 rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                        <FaRocket className="text-6xl text-purple-500 mx-auto mb-10 animate-bounce" />
+                        <h2 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter mb-8 leading-none">START YOUR <br /><span className="text-purple-500">LEGACY</span></h2>
+                        <p className="text-white/60 text-xl max-w-2xl mx-auto mb-12 font-medium">
+                            Whether you're a student player or a school administrator, the Initiative is built for you. Join our growing community today.
+                        </p>
+                        <div className="flex flex-wrap justify-center gap-6">
+                            <Link href="/initiative/packages" className="px-12 py-5 bg-white text-black hover:bg-purple-500 hover:text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] transition-all hover:scale-105 shadow-2xl">
+                                View Packages
+                            </Link>
+                            <Link href="/initiative/program-deck" className="px-12 py-5 bg-white/5 hover:bg-white text-white hover:text-black border border-white/10 rounded-[1.5rem] font-black uppercase tracking-[0.2em] transition-all hover:scale-105 backdrop-blur-md">
+                                Program Deck
+                            </Link>
+                        </div>
+                    </div>
+                </motion.div>
             </motion.div>
         </main>
     );

@@ -20,6 +20,15 @@ export default async function ProfilePage() {
         redirect("/login");
     }
 
+    // If user has a username, redirect to their public profile
+    if (user.username) {
+        redirect(`/profile/${user.username}`);
+    }
+
+    // Fetch fresh user data from DB (fallback if no username, though unlikely for fully set up users)
+    // Actually, if they don't have a username, we should stay here to let them create one via ProfileClient
+    // But ProfileClient renders the edit form, so this is correct.
+
     // Fetch tournament results if slug exists
     let tournamentResults: any[] = [];
     if (user.startggSlug) {
