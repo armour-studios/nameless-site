@@ -306,7 +306,8 @@ export function getMockEvents(limit: number = 8): Event[] {
                         startAt: tournament.startAt || 0,
                         state: tournament.state || 'COMPLETED',
                         tournament: {
-                            name: tournament.name
+                            name: tournament.name,
+                            slug: tournament.slug || ''
                         }
                     });
                 }

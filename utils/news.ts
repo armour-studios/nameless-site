@@ -148,8 +148,8 @@ export async function getAllNews(): Promise<NewsArticle[]> {
             link: `/news/${article.slug}`, // Internal link
             date: article.publishedAt ? article.publishedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
             author: article.author || article.authorUser?.name || article.authorUser?.username || "Nameless Staff",
-            authorUsername: article.authorUser?.username,
-            authorImage: article.authorUser?.image,
+            authorUsername: article.authorUser?.username || undefined,
+            authorImage: article.authorUser?.image || undefined,
             image: article.coverImage || "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&q=80",
             source: "Nameless Esports",
             category: (article as any).category || "General"
